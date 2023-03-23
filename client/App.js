@@ -10,18 +10,30 @@ import Outcomes from './outcomes';
 import Bills from './bills';
 import SmartDevices from './smartDevices';
 import More from './more';
+import CreateUserScreen from './createAccount';
 
 
 function LoginPage({ navigation }) {
+  // const [currentPage, setCurrentPage] = useState('login');
+
+  // function goBackToLogin() {
+  //   setCurrentPage('login');
+  // }
+
+  // if (currentPage !== 'login') {
+  //   return (<CreateUserScreen onBack={goBackToLogin}/>);
+  // }
+
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'lightblue' }}>
       <Text style={{ fontSize: 24, marginBottom: 20 }}>SharedSpace</Text>
       <TextInput placeholder="Username" style={{ borderWidth: 1, padding: 10, marginBottom: 10, width: '80%' }} />
       <TextInput placeholder="Password" secureTextEntry={true} style={{ borderWidth: 1, padding: 10, marginBottom: 20, width: '80%' }} />
       <Button title="Sign In" onPress={() => navigation.navigate('Main')} />
-      <TouchableOpacity onPress={() => {}}>
+      <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
         <Text style={{ marginTop: 10 }}>Create Account</Text>
       </TouchableOpacity>
+      
     </View>
   );
 }
@@ -116,15 +128,12 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginPage} />
+        <Stack.Screen name="CreateAccount" component={CreateUserScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-
-// optinal 
-
 
 
 const styles = StyleSheet.create({
