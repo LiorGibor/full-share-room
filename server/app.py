@@ -4,7 +4,6 @@ import bcrypt
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-app.debug = True
 connect_to_db = sqlite3.connect('server.db')
 db = connect_to_db.cursor()
 
