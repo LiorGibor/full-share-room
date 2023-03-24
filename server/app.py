@@ -68,5 +68,5 @@ def validate_new_user(username, password, email, full_name, date_of_birth):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
     
