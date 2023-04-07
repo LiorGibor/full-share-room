@@ -13,7 +13,7 @@ import {
 import ItemCart from "./CartItem/ItemCart";
 const DATA = [
   {
-    title: "Shalom send you a friend request",
+    title: "Ido send you a friend request",
     text: "hi kay",
     price: "130",
     image:
