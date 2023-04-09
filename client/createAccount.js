@@ -11,7 +11,7 @@ export default function CreateUserScreen({navigation}) {
 
   function handleSubmit() {
     const userData = { userName, password, email, fullName, profilePicture, dateOfBirth };
-    fetch ('http://127.0.0.1:5000/adduser', {
+    fetch ('https://localhost:5000//adduser', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
