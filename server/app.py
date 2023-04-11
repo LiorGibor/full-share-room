@@ -4,8 +4,10 @@ import sqlite3
 import bcrypt
 from flask import Flask, request, jsonify, g
 import server_assistent
+from flask_cors import CORS
 
 app = Flask(__name__)
+cors = CORS(app)
 
 
 def get_db():
