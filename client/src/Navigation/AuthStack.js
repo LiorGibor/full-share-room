@@ -8,6 +8,8 @@ import FoodBottomTabs from "../../src/Navigation/FoodBottomTabs";
 import ForgetPassword from "../Screen/Auth/ForgetPassword";
 import ChatScreen from "../Screen/Auth/ChatScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ManageTasks from "../Screen/Profile/Functions/ManageTasks";
+
 const Stack = createNativeStackNavigator();
 function AuthStack() {
   return (
@@ -36,6 +38,11 @@ function AuthStack() {
         <Stack.Screen
           name="FoodBottomTabs"
           component={FoodBottomTabs}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ManageTasks"
+          component={ManageTasks}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

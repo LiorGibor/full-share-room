@@ -68,8 +68,10 @@ export default function Login({ navigation }) {
       )
         .then((result) => {
           if (result.status == 200) {
+            console.log("success");
+            navigation.navigate("FoodBottomTabs");
+
             AsyncStorage.setItem("AccessToken", result.data.token);
-            navigation.replace("FoodBottomTabs");
           }
         })
         .catch((err) => {

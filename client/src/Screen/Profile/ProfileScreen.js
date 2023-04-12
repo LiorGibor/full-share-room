@@ -8,8 +8,13 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
+// import ManageTasks from "./Functions/ManageTasks";
 
-export default function ProfileScreen(props) {
+export default function ProfileScreen({ navigation }) {
+  const handleNavigate = (screen) => {
+    navigation.navigate(screen);
+  };
+
   return (
     <View style={styles.container}>
       <View
@@ -45,21 +50,23 @@ export default function ProfileScreen(props) {
             marginHorizontal: 20,
           }}
         >
-          <View style={styles.box}>
-            <View>
-              <Text numberOfLines={2} style={styles.textBox}>
-                Mange Task
-              </Text>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => handleNavigate("ManageTasks")}
+          >
+            <Text numberOfLines={2} style={styles.textBox}>
+              Mange Task
+            </Text>
+          </TouchableOpacity>
           <View style={{ flex: 1 }}></View>
-          <View style={styles.box}>
-            <View>
-              <Text style={styles.textBox}>
-                Opening a new call for the apartment owner
-              </Text>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => handleNavigate("NewCall")}
+          >
+            <Text style={styles.textBox}>
+              Opening a new call for the apartment owner
+            </Text>
+          </TouchableOpacity>
         </View>
         <View
           style={{
@@ -70,19 +77,21 @@ export default function ProfileScreen(props) {
             marginHorizontal: 20,
           }}
         >
-          <View style={styles.box}>
-            <View>
-              <Text numberOfLines={2} style={styles.textBox}>
-                Mange Outcomes
-              </Text>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => handleNavigate("ManageOutcome")}
+          >
+            <Text numberOfLines={2} style={styles.textBox}>
+              Mange Outcomes
+            </Text>
+          </TouchableOpacity>
           <View style={{ flex: 1 }}></View>
-          <View style={styles.box}>
-            <View>
-              <Text style={styles.textBox}>Pay bills</Text>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => handleNavigate("PayBills")}
+          >
+            <Text style={styles.textBox}>Pay bills</Text>
+          </TouchableOpacity>
         </View>
         <View
           style={{
@@ -93,19 +102,21 @@ export default function ProfileScreen(props) {
             marginHorizontal: 20,
           }}
         >
-          <View style={styles.box}>
-            <View>
-              <Text numberOfLines={2} style={styles.textBox}>
-                Smart Devices Integration
-              </Text>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => handleNavigate("SmartDevice")}
+          >
+            <Text numberOfLines={2} style={styles.textBox}>
+              Smart Devices Integration
+            </Text>
+          </TouchableOpacity>
           <View style={{ flex: 1 }}></View>
-          <View style={styles.box}>
-            <View>
-              <Text style={styles.textBox}>More...</Text>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.box}
+            onPress={() => handleNavigate("More")}
+          >
+            <Text style={styles.textBox}>More...</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
