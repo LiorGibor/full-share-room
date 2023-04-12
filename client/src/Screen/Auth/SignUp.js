@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { adduser } from "../../api/user_api";
 
 import {
   SafeAreaView,
@@ -14,14 +15,25 @@ import Theme from "../../Constants/Theme";
 import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 export default function SignUp({ navigation }) {
-  const [name, setName] = useState(""); // In this state whatever name you write will be stored you can use it for sending to server
+  const [full_name, setName] = useState(""); // In this state whatever name you write will be stored you can use it for sending to server
   const [email, setEmail] = useState(""); // In this state whatever email you write will be stored you can use it for sending to server
   const [password, setPassword] = useState(""); // In this state whatever password you write will be stored you can use it for sending to server
   const [password_confirmation, setPassword_Confirmation] = useState(""); // In this state whatever Confirm Password you write will be stored you can use it for sending to server
+  const [username, setUsername] = useState("");
+  const [date_of_birth, setDateOfBirth] = useState("");
+
   const signUpFun = () => {
     //Here is your email and password you can send from here
-    alert("Name=>" + name + " Email=>" + email + " Password=>" + password);
-    navigation.navigate("FoodBottomTabs");
+    adduser(
+      JSON.stringify({
+        username: username.toLocaleLowerCase(),
+        email: email.toLocaleLowerCase(),
+        password: password,
+        full_name: full_name,
+        date_of_birth: date_of_birth,
+      })
+    );
+    navigation.navigate("Login");
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -46,16 +58,16 @@ export default function SignUp({ navigation }) {
         {/* Your Name field Component below */}
 
         <InputFieldComponent
-          value={name}
-          onChangeText={(name) => setName(name.trim())}
-          icon="alpha-f-circle-outline"
-          label="Name"
+          value={full_name}
+          onChangeText={(full_name) => setName(full_name.trim())}
+          icon="heart"
+          label="Full Name"
         />
         {/* Your Email field Component below */}
         <InputFieldComponent
           value={email}
           onChangeText={(email) => setEmail(email.trim())}
-          icon="email"
+          icon="mail"
           label="E-mail"
         />
 
@@ -75,6 +87,18 @@ export default function SignUp({ navigation }) {
           }
           icon="key"
           label="Confrim Password"
+        />
+        <InputFieldComponent
+          value={username}
+          onChangeText={(username) => setUsername(username.trim())}
+          icon="lock"
+          label="Username"
+        />
+        <InputFieldComponent
+          value={date_of_birth}
+          onChangeText={(date_of_birth) => setDateOfBirth(date_of_birth.trim())}
+          icon="star"
+          label="Date Of Birth"
         />
       </View>
       <View style={{ marginHorizontal: 20 }}>
