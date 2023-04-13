@@ -8,21 +8,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 cors = CORS(app)
-
-
-def get_db():
-    """Get a new database connection"""
-    if 'db' not in g:
-        g.db = sqlite3.connect('server.db')
-    return g.db
-
-
-@app.teardown_appcontext
-def close_db(error):
-    """Close the database connection at the end of the request"""
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
+server_assistent.init_db()
 
 
 @app.route('/register', methods=['POST'])
@@ -36,7 +22,7 @@ def register():
     password = data['password']
 
     # Check if the user exists in the database by username
-    user, success = server_assistent.query_db("SELECT * FROM users WHERE name=?", (username,), one=True)
+    user, success = server_assistent.query_db("SELECT * FROM users WHERE username=?", (username,), one=True)
 
     if success and user:
         # User found, compare the stored password hash with the provided password
@@ -53,7 +39,6 @@ def register():
         return jsonify({"message": "Invalid username or password"}), 401
 
 
-
 @app.route('/adduser', methods=['POST'])
 def add_user():
     data = request.get_json()
@@ -61,27 +46,26 @@ def add_user():
     password = data['password']
     email = data['email']
     full_name = data['full_name']
-    profile_picture = data['profile_picture']
+    # profile_picture = data['profile_picture']
     date_of_birth = data['date_of_birth']
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     created_at = datetime.datetime.now()
     updated_at = datetime.datetime.now()
     last_login = datetime.datetime.now()
     role = 'user'
-    profile_picture = 'C:\\Users\\lmaim\\Desktop\\bsc\\4th_year\\Final_progect\\alternative_final_project\\client\\assets\\profilePic.png'
+    # profile_picture = 'C:\\Users\\lmaim\\Desktop\\bsc\\4th_year\\Final_progect\\alternative_final_project\\client\\assets\\profilePic.png'
     if validate_new_user(username, password, email, full_name, date_of_birth) is not True:
         return jsonify({'status': 'fail'}), 400
     result, success = server_assistent.query_db(
-        'INSERT INTO users (name, hashedPassword, email, fullName, profilePicture, dateOfBirth, createdAt, updatedAt, lastLogin, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO users (username, hashedPassword, email, fullName, dateOfBirth, createdAt, updatedAt, lastLogin, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         (
-        username, hashed_password, email, full_name, profile_picture, date_of_birth, created_at, updated_at, last_login,
+        username, hashed_password, email, full_name, date_of_birth, created_at, updated_at, last_login,
         role))
 
     if success:
         return jsonify({'status': 'success'}), 200
     else:
         return jsonify({'status': 'fail'}), 500
-
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
