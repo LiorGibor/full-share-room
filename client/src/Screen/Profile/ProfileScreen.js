@@ -61,7 +61,7 @@ export default function ProfileScreen({ navigation }) {
           <View style={{ flex: 1 }}></View>
           <TouchableOpacity
             style={styles.box}
-            onPress={() => handleNavigate("NewCall")}
+            onPress={() => handleNavigate("ApplyRequest")}
           >
             <Text style={styles.textBox}>
               Opening a new call for the apartment owner
@@ -79,7 +79,7 @@ export default function ProfileScreen({ navigation }) {
         >
           <TouchableOpacity
             style={styles.box}
-            onPress={() => handleNavigate("ManageOutcome")}
+            onPress={() => handleNavigate("SplitPayments")}
           >
             <Text numberOfLines={2} style={styles.textBox}>
               Mange Outcomes
