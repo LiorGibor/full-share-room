@@ -9,6 +9,8 @@ import ForgetPassword from "../Screen/Auth/ForgetPassword";
 import ChatScreen from "../Screen/Auth/ChatScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ManageTasks from "../Screen/Profile/Functions/ManageTasks";
+import ApplyRequest from "../Screen/Profile/Functions/ApplyRequest";
+import SplitPayments from "../Screen/Profile/Functions/SplitPayments";
 
 const Stack = createNativeStackNavigator();
 function AuthStack() {
@@ -45,8 +47,19 @@ function AuthStack() {
           component={ManageTasks}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="ApplyRequest"
+          component={ApplyRequest}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SplitPayments"
+          component={SplitPayments}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
 export default AuthStack;

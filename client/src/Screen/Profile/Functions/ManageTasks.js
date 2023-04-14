@@ -8,11 +8,13 @@ import {
   TextInput,
   Keyboard,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 
 const ManageTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [newTaskText, setNewTaskText] = useState("");
+  const navigation = useNavigation();
 
   useEffect(() => {
     axios
@@ -86,6 +88,13 @@ const ManageTasks = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <TouchableOpacity
+        style={styles.navButton}
+        onPress={() => navigation.navigate("FoodBottomTabs")}
+      >
+        <Text style={styles.navButtonText}>Home</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -113,31 +122,42 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
+  delete: {
+    fontSize: 20,
+    color: "red",
+    marginRight: 10,
+  },
   taskText: {
     flex: 1,
     fontSize: 16,
-    marginLeft: 10,
-  },
-  delete: {
-    color: "red",
-    fontSize: 20,
   },
   complete: {
-    color: "green",
     fontSize: 20,
+    color: "green",
+    marginLeft: 10,
   },
   addButton: {
-    backgroundColor: "blue",
-    borderRadius: 15,
-    width: 30,
-    height: 30,
-    alignItems: "center",
+    backgroundColor: "#ccc",
+    borderRadius: 50,
+    width: 50,
+    height: 50,
     justifyContent: "center",
+    alignItems: "center",
     marginLeft: 10,
   },
   addButtonText: {
-    color: "white",
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  navButton: {
+    backgroundColor: "#007AFF",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  navButtonText: {
+    fontSize: 16,
+    color: "#fff",
   },
 });
 
