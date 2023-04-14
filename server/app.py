@@ -59,13 +59,31 @@ def add_user():
     result, success = server_assistent.query_db(
         'INSERT INTO users (username, hashedPassword, email, fullName, dateOfBirth, createdAt, updatedAt, lastLogin, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         (
-        username, hashed_password, email, full_name, date_of_birth, created_at, updated_at, last_login,
-        role))
+            username, hashed_password, email, full_name, date_of_birth, created_at, updated_at, last_login,
+            role))
 
     if success:
         return jsonify({'status': 'success'}), 200
     else:
         return jsonify({'status': 'fail'}), 500
+
+
+@app.route('/open_call', methods=['POST'])
+def open_call():
+    data = request.get_json()
+    email = data['email']
+    fault_name = data['subject']
+    fault_description = data['summary']
+
+    user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (email,))
+    if success and user_id:
+        group_id, success = server_assistent.query_db('SELECT group_id FROM group_members where user_id=?',
+                                                      (user_id,))
+        created_date = datetime.datetime.now()
+        result, success = server_assistent.query_db('INSERT INTO faults (group_id, fault_name, fault_description,'
+                                                    ' created_date, fixed) VALUES (?,?,?,?,?)',
+                                                    (group_id,fault_name,fault_description,created_date,False))
+
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
