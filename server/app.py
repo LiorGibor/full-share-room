@@ -75,15 +75,46 @@ def open_call():
     fault_name = data['subject']
     fault_description = data['summary']
 
-    user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (email,))
+    user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (email,),True)
+    user_id = user_id[0]
     if success and user_id:
         group_id, success = server_assistent.query_db('SELECT group_id FROM group_members where user_id=?',
-                                                      (user_id,))
-        created_date = datetime.datetime.now()
+                                                      (user_id,),True)
+        group_id = group_id[0]
+        created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         result, success = server_assistent.query_db('INSERT INTO faults (group_id, fault_name, fault_description,'
                                                     ' created_date, fixed) VALUES (?,?,?,?,?)',
-                                                    (group_id,fault_name,fault_description,created_date,False))
+                                                    (group_id, fault_name, fault_description, created_date, False))
+        if success:
+            return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'Failed to add user to group'}), 500
 
+
+@app.route('/add_group', methods=['POST'])
+def add_group():
+    data = request.get_json()
+
+    user_name = data['username']
+    group_name = data['group_name']
+    group_description = data['group_description']
+
+    user_id_result, success = server_assistent.query_db('SELECT id FROM users WHERE username=?', (user_name,), True)
+    if not success or user_id_result is None:
+        return jsonify({'status': 'fail', 'message': 'User not found'}), 404
+
+    user_id = user_id_result[0]
+    group_id, success = server_assistent.query_db('INSERT INTO groups (group_name, group_details) VALUES (?, ?)',
+                                                  (group_name, group_description,))
+    if not success:
+        return jsonify({'status': 'fail', 'message': 'Failed to create group'}), 500
+    created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    _, success = server_assistent.query_db('INSERT INTO group_members (group_id, user_id, user_join_to_group) '
+                                           'VALUES (?,?,?)', (group_id, user_id, created_date))
+    if success:
+        return jsonify({'status': 'success'}), 200
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to add user to group'}), 500
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
