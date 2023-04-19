@@ -156,6 +156,11 @@ def query_db(query, args=(), one=False):
         conn = sqlite3.connect(DATABASE)
         cur = conn.cursor()
         cur.execute(query, args)
+        if query.strip().upper().startswith("INSERT"):
+            last_row_id = cur.lastrowid
+            conn.commit()
+            conn.close()
+            return last_row_id, True
         conn.commit()  # Add this line if your query modifies the database (INSERT, UPDATE, DELETE)
 
         result = cur.fetchall()
