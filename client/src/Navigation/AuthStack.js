@@ -11,6 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ManageTasks from "../Screen/Profile/Functions/ManageTasks";
 import ApplyRequest from "../Screen/Profile/Functions/ApplyRequest";
 import SplitPayments from "../Screen/Profile/Functions/SplitPayments";
+import UploadDocumentPage from "../Screen/Profile/Functions/UploadDocumentPage";
 
 const Stack = createNativeStackNavigator();
 function AuthStack() {
@@ -55,6 +56,11 @@ function AuthStack() {
         <Stack.Screen
           name="SplitPayments"
           component={SplitPayments}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UploadDocumentPage"
+          component={UploadDocumentPage}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

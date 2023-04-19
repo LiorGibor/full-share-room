@@ -115,7 +115,10 @@ const SplitPayments = () => {
         ))}
       </View>
 
-      <Button title="Home" onPress={() => navigation.navigate("Home")} />
+      <Button
+        title="Home"
+        onPress={() => navigation.navigate("FoodBottomTabs")}
+      />
     </View>
   );
 };

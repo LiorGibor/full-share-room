@@ -88,9 +88,9 @@ export default function ProfileScreen({ navigation }) {
           <View style={{ flex: 1 }}></View>
           <TouchableOpacity
             style={styles.box}
-            onPress={() => handleNavigate("PayBills")}
+            onPress={() => handleNavigate("UploadDocumentPage")}
           >
-            <Text style={styles.textBox}>Pay bills</Text>
+            <Text style={styles.textBox}>Upload Documents</Text>
           </TouchableOpacity>
         </View>
         <View
@@ -104,7 +104,7 @@ export default function ProfileScreen({ navigation }) {
         >
           <TouchableOpacity
             style={styles.box}
-            onPress={() => handleNavigate("SmartDevice")}
+            onPress={() => handleNavigate("UploadDocumentPage")}
           >
             <Text numberOfLines={2} style={styles.textBox}>
               Smart Devices Integration
