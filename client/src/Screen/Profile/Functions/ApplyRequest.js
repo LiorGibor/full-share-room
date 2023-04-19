@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,15 @@ import {
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import { UserContext } from "../../../api/UserContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ApplyRequest = () => {
   const [subject, setSubject] = useState("");
   const [summary, setSummary] = useState("");
+  const [email, setEmail] = useState("");
   const [fileUri, setFileUri] = useState(null);
+
   const navigation = useNavigation();
 
   const pickDocument = async () => {
@@ -23,22 +27,30 @@ const ApplyRequest = () => {
     }
   };
 
+  useEffect(() => {
+    AsyncStorage.getItem("userEmail")
+      .then((email) => {
+        setEmail(email);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+
   const handleSubmit = async () => {
-    const formData = new FormData();
-    formData.append("subject", subject);
-    formData.append("summary", summary);
-    formData.append("file", {
-      uri: fileUri,
-      name: "file.pdf", // replace with actual file name
-      type: "application/pdf", // replace with actual file type
+    const data = JSON.stringify({
+      email: email, // replace with the email of the current user
+      subject,
+      summary,
     });
 
     try {
+      console.log(data);
       const response = await axios.post(
-        "http://localhost:3000/requests",
-        formData,
+        "http://localhost:5000/open_call",
+        data,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { "Content-Type": "application/json" },
         }
       );
       console.log(response.data); // handle success response
