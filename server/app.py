@@ -15,14 +15,14 @@ server_assistent.init_db()
 def register():
     data = request.get_json()
 
-    if not data or 'username' not in data or 'password' not in data:
+    if not data or 'email' not in data or 'password' not in data:
         return jsonify({"message": "Invalid input"}), 400
 
-    username = data['username']
+    email = data['email']
     password = data['password']
 
     # Check if the user exists in the database by username
-    user, success = server_assistent.query_db("SELECT * FROM users WHERE username=?", (username,), one=True)
+    user, success = server_assistent.query_db("SELECT * FROM users WHERE email=?", (email,), one=True)
 
     if success and user:
         # User found, compare the stored password hash with the provided password
@@ -115,6 +115,27 @@ def add_group():
         return jsonify({'status': 'success'}), 200
     else:
         return jsonify({'status': 'fail', 'message': 'Failed to add user to group'}), 500
+
+
+@app.route('/enter_to_group', methods=['POST'])
+def enter_to_group():
+    data = request.get_json()
+
+    user_email = data['email']
+    user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (user_email,), True)
+    user_id = user_id[0]
+    group_id = data['group_id']
+    # checking if the user in the group
+    group_member_id, success = server_assistent.query_db('SELECT group_member_id FROM group_members WHERE group_id=?'
+                                                         ' and user_id=?', (group_id, user_id,), True)
+    if success:
+        if group_member_id[0] is not 0:
+            created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            group_member_id, success = server_assistent.query_db(
+                'INSERT INTO group_members (group_id, user_id, user_join_to_group) VALUES (?,?,?)', (group_id, user_id,
+                                                                                                     created_date), True)
+            if success:
+                return jsonify({'status': 'success'}), 200
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
