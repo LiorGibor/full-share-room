@@ -129,7 +129,7 @@ def enter_to_group():
     group_member_id, success = server_assistent.query_db('SELECT group_member_id FROM group_members WHERE group_id=?'
                                                          ' and user_id=?', (group_id, user_id,), True)
     if success:
-        if group_member_id[0] is not 0:
+        if not group_member_id:
             created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             group_member_id, success = server_assistent.query_db(
                 'INSERT INTO group_members (group_id, user_id, user_join_to_group) VALUES (?,?,?)', (group_id, user_id,
