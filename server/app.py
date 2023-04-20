@@ -114,7 +114,7 @@ def add_group():
     if success:
         return jsonify({'status': 'success'}), 200
     else:
-        return jsonify({'status': 'fail', 'message': 'Failed to add user to group'}), 500
+        return jsonify({'status': 'fail'}), 500
 
 
 @app.route('/enter_to_group', methods=['POST'])
@@ -136,6 +136,22 @@ def enter_to_group():
                                                                                                      created_date), True)
             if success:
                 return jsonify({'status': 'success'}), 200
+
+
+@app.route('/id_from_email', methods=['POST'])
+def id_from_email():
+    data = request.get_json()
+
+    user_email = data['email']
+    user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (user_email,), True)
+    if success:
+        if user_id:
+            user_id = user_id[0]
+            return jsonify({'status': 'success', 'user': user_id}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'Failed to find this user email'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to find this user email'}), 500
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
