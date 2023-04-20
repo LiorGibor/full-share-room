@@ -122,20 +122,36 @@ def enter_to_group():
     data = request.get_json()
 
     user_email = data['email']
+    group_id = data['group_id']
+
+    # Get user_id from the database using the provided email
     user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (user_email,), True)
     user_id = user_id[0]
-    group_id = data['group_id']
-    # checking if the user in the group
-    group_member_id, success = server_assistent.query_db('SELECT group_member_id FROM group_members WHERE group_id=?'
-                                                         ' and user_id=?', (group_id, user_id,), True)
+
+    if not success:
+        return jsonify({'status': 'error', 'message': 'Error fetching user_id'}), 500
+
+    # Check if the user is already a member of the group
+    group_member_id, success = server_assistent.query_db(
+        'SELECT group_member_id FROM group_members WHERE group_id=? and user_id=?',
+        (group_id, user_id,), True)
+
+    if not success:
+        return jsonify({'status': 'error', 'message': 'Error fetching group membership'}), 500
+
+    if group_member_id:
+        return jsonify({'status': 'error', 'message': 'User is already a member of the group'}), 400
+
+    # Add user to the group
+    created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    group_member_id, success = server_assistent.query_db(
+        'INSERT INTO group_members (group_id, user_id, user_join_to_group) VALUES (?,?,?)',
+        (group_id, user_id, created_date), True)
+
     if success:
-        if not group_member_id:
-            created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            group_member_id, success = server_assistent.query_db(
-                'INSERT INTO group_members (group_id, user_id, user_join_to_group) VALUES (?,?,?)', (group_id, user_id,
-                                                                                                     created_date), True)
-            if success:
-                return jsonify({'status': 'success'}), 200
+        return jsonify({'status': 'success'}), 200
+    else:
+        return jsonify({'status': 'error', 'message': 'Error adding user to the group'}), 500
 
 
 @app.route('/id_from_email', methods=['POST'])
@@ -152,6 +168,22 @@ def id_from_email():
             return jsonify({'status': 'fail', 'message': 'Failed to find this user email'}), 500
     else:
         return jsonify({'status': 'fail', 'message': 'Failed to find this user email'}), 500
+
+
+@app.route('/group_id_from_user_id', methods=['POST'])
+def group_id_from_user_id():
+    data = request.get_json()
+
+    user_id = data['user_id']
+    group_id, success = server_assistent.query_db('SELECT group_id FROM group_members WHERE user_id=?', (user_id,), True)
+    if success:
+        if group_id:
+            group_id = group_id[0]
+            return jsonify({'status': 'success', 'group': group_id}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'Failed to find this user id'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to find this user id'}), 500
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
