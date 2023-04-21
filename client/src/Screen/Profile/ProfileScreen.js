@@ -113,9 +113,9 @@ export default function ProfileScreen({ navigation }) {
           <View style={{ flex: 1 }}></View>
           <TouchableOpacity
             style={styles.box}
-            onPress={() => handleNavigate("More")}
+            onPress={() => handleNavigate("GroupPage")}
           >
-            <Text style={styles.textBox}>More...</Text>
+            <Text style={styles.textBox}>Join Group</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
