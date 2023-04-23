@@ -186,6 +186,28 @@ def group_id_from_user_id():
         return jsonify({'status': 'fail', 'message': 'Failed to find this user id'}), 500
 
 
+@app.route('/add_mission', methods=['POST'])
+def add_mission():
+    data = request.get_json()
+
+    group_id = data['group_id']
+    mission_name = data['mission_name']
+    mission_description = data['mission_description']
+    # Add mission to the missions
+    created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    mission_id, success = server_assistent.query_db(
+        'INSERT INTO missions (group_id, mission_name, mission_description, created_date, completed) VALUES (?,?,?,?,?)',
+        (group_id, mission_name, mission_description, created_date, False), True)
+    if success:
+        if mission_id:
+            return jsonify({'status': 'success', 'group': mission_id}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'Failed to insert this mission'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to add to DB'}), 500
+
+
+
 def validate_new_user(username, password, email, full_name, date_of_birth):
     if len(username) < 4:
         return jsonify({'status': 'Username must be at least 4 characters'}), 400
