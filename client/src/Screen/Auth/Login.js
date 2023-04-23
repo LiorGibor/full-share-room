@@ -71,7 +71,7 @@ export default function Login({ navigation }) {
     if (!checkPassowrd) {
       user_login(
         JSON.stringify({
-          username: email.toLocaleLowerCase(),
+          email: email.toLocaleLowerCase(),
           password: password,
         })
       )

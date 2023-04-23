@@ -12,6 +12,7 @@ import ManageTasks from "../Screen/Profile/Functions/ManageTasks";
 import ApplyRequest from "../Screen/Profile/Functions/ApplyRequest";
 import SplitPayments from "../Screen/Profile/Functions/SplitPayments";
 import UploadDocumentPage from "../Screen/Profile/Functions/UploadDocumentPage";
+import GroupPage from "../Screen/Profile/Functions/GroupPage";
 
 const Stack = createNativeStackNavigator();
 function AuthStack() {
@@ -61,6 +62,11 @@ function AuthStack() {
         <Stack.Screen
           name="UploadDocumentPage"
           component={UploadDocumentPage}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="GroupPage"
+          component={GroupPage}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
