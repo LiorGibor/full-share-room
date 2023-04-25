@@ -117,14 +117,14 @@ def create_bills_table():
     cur.execute('''CREATE TABLE IF NOT EXISTS bills (
                     bill_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
-                    group_member_id INTEGER,
+                    user_id INTEGER,
                     bill_name TEXT NOT NULL,
                     amount REAL NOT NULL,
                     bill_date TIMESTAMP,
                     created_date TIMESTAMP NOT NULL,
 
-                    FOREIGN KEY (group_id) REFERENCES groups (group_id),
-                    FOREIGN KEY (group_member_id) REFERENCES group_members (group_member_id)
+                    FOREIGN KEY (group_id) REFERENCES group_members (group_id),
+                    FOREIGN KEY (user_id) REFERENCES group_members (user_id)
                 )''')
 
     conn.commit()
@@ -137,14 +137,16 @@ def create_outcomes_table():
 
     cur.execute('''CREATE TABLE IF NOT EXISTS outcomes (
                     outcome_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    group_member_id INTEGER NOT NULL,
+                    group_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL,
                     outcome_name TEXT NOT NULL,
                     outcome_description TEXT,
                     amount REAL NOT NULL,
                     outcome_date TIMESTAMP,
                     created_date TIMESTAMP NOT NULL,
 
-                    FOREIGN KEY (group_member_id) REFERENCES group_members (group_member_id)
+                    FOREIGN KEY (group_id) REFERENCES group_members (group_id),
+                    FOREIGN KEY (user_id) REFERENCES group_members (user_id)
                 )''')
 
     conn.commit()
@@ -164,6 +166,9 @@ def query_db(query, args=(), one=False):
         conn.commit()  # Add this line if your query modifies the database (INSERT, UPDATE, DELETE)
 
         result = cur.fetchall()
+        if query.strip().upper().startswith("DELETE"):
+            result =cur.rowcount
+            return result, True
         conn.close()
 
         # Return a tuple containing the result and a boolean indicating success

@@ -91,6 +91,22 @@ def open_call():
             return jsonify({'status': 'fail', 'message': 'Failed to add user to group'}), 500
 
 
+@app.route('/delete_call', methods=['POST'])
+def delete_call():
+    data = request.get_json()
+    fault_id = data['fault_id']
+
+    deleted_row, success = server_assistent.query_db(
+        'DELETE FROM faults WHERE fault_id = ?', (fault_id,), True)
+    if success:
+        if deleted_row:
+            return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'no row deleted'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to connect to DB'}), 500
+
+
 @app.route('/add_group', methods=['POST'])
 def add_group():
     data = request.get_json()
@@ -206,6 +222,101 @@ def add_mission():
     else:
         return jsonify({'status': 'fail', 'message': 'Failed to add to DB'}), 500
 
+
+@app.route('/remove_mission', methods=['POST'])
+def remove_mission():
+    data = request.get_json()
+
+    mission_id = data['mission_id']
+
+    deleted_row, success = server_assistent.query_db(
+        'DELETE FROM missions WHERE mission_id = ?', (mission_id,), True)
+    if success:
+        if deleted_row:
+            return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'no row deleted'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to connect to DB'}), 500
+
+
+@app.route('/add_outcome', methods=['POST'])
+def add_outcome():
+    data = request.get_json()
+    group_id = data['group_id']
+    user_id = data['user_id']
+    outcome_name = data['outcome_name']
+    outcome_description = data['outcome_description']
+    amount = data['amount']
+    outcome_date = data['outcome_date']
+    created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    outcome_id, success = server_assistent.query_db(
+        'INSERT INTO outcomes (group_id, user_id, outcome_name, outcome_description, amount, outcome_date, '
+        'created_date) VALUES (?,?,?,?,?,?,?)',
+        (group_id, user_id, outcome_name, outcome_description, amount, outcome_date, created_date), True)
+    if success:
+        if outcome_id:
+            return jsonify({'status': 'success', 'outcome_id': outcome_id}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'Failed to insert this outcome'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to add to DB'}), 500
+
+
+@app.route('/remove_outcome', methods=['POST'])
+def remove_outcome():
+    data = request.get_json()
+
+    outcome_id = data['outcome_id']
+
+    deleted_row, success = server_assistent.query_db(
+        'DELETE FROM outcomes WHERE outcome_id = ?', (outcome_id,), True)
+    if success:
+        if deleted_row:
+            return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'no row deleted'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to connect to DB'}), 500
+
+
+@app.route('/add_bill', methods=['POST'])
+def add_bill():
+    data = request.get_json()
+    group_id = data['group_id']
+    user_id = data['user_id']
+    bill_name = data['bill_name']
+    amount = data['amount']
+    bill_date = data['bill_date']
+    created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    bill_id, success = server_assistent.query_db(
+        'INSERT INTO bills (group_id, user_id, bill_name, amount, bill_date, '
+        'created_date) VALUES (?,?,?,?,?,?)',
+        (group_id, user_id, bill_name, amount, bill_date, created_date), True)
+    if success:
+        if bill_id:
+            return jsonify({'status': 'success', 'bill_id': bill_id}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'Failed to insert this bills'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to add to DB'}), 500
+
+
+@app.route('/remove_bill', methods=['POST'])
+def remove_bill():
+    data = request.get_json()
+
+    bill_id = data['bill_id']
+
+    deleted_row, success = server_assistent.query_db(
+        'DELETE FROM bills WHERE bill_id = ?', (bill_id,), True)
+    if success:
+        if deleted_row:
+            return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'no row deleted'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to connect to DB'}), 500
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
