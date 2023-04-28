@@ -22,11 +22,13 @@ def register():
     password = data['password']
 
     # Check if the user exists in the database by username
-    user, success = server_assistent.query_db("SELECT * FROM users WHERE email=?", (email,), one=True)
+    user, success = server_assistent.query_db(
+        "SELECT * FROM users WHERE email=?", (email,), one=True)
 
     if success and user:
         # User found, compare the stored password hash with the provided password
-        stored_hashed_password = user[2]  # Assuming the column name is 'hashedPassword'
+        # Assuming the column name is 'hashedPassword'
+        stored_hashed_password = user[2]
         if bcrypt.checkpw(password.encode('utf-8'), stored_hashed_password):
             # Passwords match, generate token and return it with status code 200
             token = server_assistent.generate_token()
@@ -75,11 +77,12 @@ def open_call():
     fault_name = data['subject']
     fault_description = data['summary']
 
-    user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (email,),True)
+    user_id, success = server_assistent.query_db(
+        'SELECT id FROM users WHERE email=?', (email,), True)
     user_id = user_id[0]
     if success and user_id:
         group_id, success = server_assistent.query_db('SELECT group_id FROM group_members where user_id=?',
-                                                      (user_id,),True)
+                                                      (user_id,), True)
         group_id = group_id[0]
         created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         result, success = server_assistent.query_db('INSERT INTO faults (group_id, fault_name, fault_description,'
@@ -115,7 +118,8 @@ def add_group():
     group_name = data['group_name']
     group_description = data['group_description']
 
-    user_id_result, success = server_assistent.query_db('SELECT id FROM users WHERE username=?', (user_name,), True)
+    user_id_result, success = server_assistent.query_db(
+        'SELECT id FROM users WHERE username=?', (user_name,), True)
     if not success or user_id_result is None:
         return jsonify({'status': 'fail', 'message': 'User not found'}), 404
 
@@ -141,7 +145,8 @@ def enter_to_group():
     group_id = data['group_id']
 
     # Get user_id from the database using the provided email
-    user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (user_email,), True)
+    user_id, success = server_assistent.query_db(
+        'SELECT id FROM users WHERE email=?', (user_email,), True)
     user_id = user_id[0]
 
     if not success:
@@ -175,7 +180,8 @@ def id_from_email():
     data = request.get_json()
 
     user_email = data['email']
-    user_id, success = server_assistent.query_db('SELECT id FROM users WHERE email=?', (user_email,), True)
+    user_id, success = server_assistent.query_db(
+        'SELECT id FROM users WHERE email=?', (user_email,), True)
     if success:
         if user_id:
             user_id = user_id[0]
@@ -191,7 +197,8 @@ def group_id_from_user_id():
     data = request.get_json()
 
     user_id = data['user_id']
-    group_id, success = server_assistent.query_db('SELECT group_id FROM group_members WHERE user_id=?', (user_id,), True)
+    group_id, success = server_assistent.query_db(
+        'SELECT group_id FROM group_members WHERE user_id=?', (user_id,), True)
     if success:
         if group_id:
             group_id = group_id[0]
@@ -246,14 +253,14 @@ def add_outcome():
     group_id = data['group_id']
     user_id = data['user_id']
     outcome_name = data['outcome_name']
-    outcome_description = data['outcome_description']
+    # outcome_description = data['outcome_description']
     amount = data['amount']
-    outcome_date = data['outcome_date']
+    # outcome_date = data['outcome_date']
     created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     outcome_id, success = server_assistent.query_db(
-        'INSERT INTO outcomes (group_id, user_id, outcome_name, outcome_description, amount, outcome_date, '
-        'created_date) VALUES (?,?,?,?,?,?,?)',
-        (group_id, user_id, outcome_name, outcome_description, amount, outcome_date, created_date), True)
+        'INSERT INTO outcomes (group_id, user_id, outcome_name,  amount,  '
+        'created_date) VALUES (?,?,?,?,?)',
+        (group_id, user_id, outcome_name,  amount,  created_date), True)
     if success:
         if outcome_id:
             return jsonify({'status': 'success', 'outcome_id': outcome_id}), 200

@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SplitPayments = () => {
   const navigation = useNavigation();
 
   const [expenses, setExpenses] = useState([]);
   const [newExpense, setNewExpense] = useState({
-    user: "",
     name: "",
     amount: 0,
   });
   const [debts, setDebts] = useState({});
+  const [groupID, setGroupID] = useState("");
+  const [userID, setUserID] = useState("");
 
   const calculateDebts = () => {
     const debts = {};
@@ -35,16 +37,26 @@ const SplitPayments = () => {
     setDebts(debts);
   };
 
-  const addExpense = () => {
-    axios
-      .post("https://your-api-url.com/expenses", newExpense)
-      .then((response) => {
-        setExpenses([...expenses, response.data]);
-        setNewExpense({ user: "", name: "", amount: 0 });
-      })
-      .catch((error) => {
-        console.log(error);
+  const addExpense = async () => {
+    // data = request.get_json()
+    // group_id = data['group_id']
+    // user_id = data['user_id']
+    // outcome_name = data['outcome_name']
+    // amount = data['amount']
+
+    const data = JSON.stringify({
+      group_id: groupID, // replace with the email of the current user
+      user_id: userID, // replace with the email of the current user
+      outcome_name: newExpense.name,
+      amount: newExpense.amount,
+    });
+    try {
+      await axios.post("http://localhost:5000/add_outcome", data, {
+        headers: { "Content-Type": "application/json" },
       });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const fetchExpenses = () => {
@@ -58,18 +70,29 @@ const SplitPayments = () => {
       });
   };
 
+  useEffect(() => {
+    const fetchGroupID = async () => {
+      const storedGroupID = await AsyncStorage.getItem("groupID");
+      setGroupID(storedGroupID);
+    };
+    const fetchUserID = async () => {
+      const storedUserID = await AsyncStorage.getItem("userID");
+      setUserID(storedUserID);
+    };
+    fetchGroupID();
+    fetchUserID();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Expenses Table</Text>
       <View style={styles.table}>
         <View style={styles.row}>
-          <Text style={styles.cell}>User</Text>
           <Text style={styles.cell}>Name</Text>
           <Text style={styles.cell}>Amount</Text>
         </View>
         {expenses.map((expense, index) => (
           <View key={index} style={styles.row}>
-            <Text style={styles.cell}>{expense.user}</Text>
             <Text style={styles.cell}>{expense.name}</Text>
             <Text style={styles.cell}>{expense.amount}</Text>
           </View>
@@ -77,12 +100,7 @@ const SplitPayments = () => {
       </View>
 
       <Text style={styles.heading}>Add Expense</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="User"
-        onChangeText={(text) => setNewExpense({ ...newExpense, user: text })}
-        value={newExpense.user}
-      />
+
       <TextInput
         style={styles.input}
         placeholder="Name"
