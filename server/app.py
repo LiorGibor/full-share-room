@@ -347,7 +347,6 @@ def outcomes_from_group_id():
     json_data = json.dumps(rows_as_dicts)
     return jsonify(json_data), 200
 
-
 def validate_new_user(username, password, email, full_name, date_of_birth):
     if len(username) < 4:
         return jsonify({'status': 'Username must be at least 4 characters'}), 400
