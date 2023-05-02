@@ -16,50 +16,17 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { user_login } from "../../api/user_api";
 import { UserContext } from "../../api/UserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 import Theme from "../../Constants/Theme";
 export default function Login({ navigation }) {
   const [email, setEmail] = useState(""); // In this state whatever email you write will be stored you can use it for sending to server
   const [password, setPassword] = useState(""); // In this state whatever password you write will be stored you can use it for sending to server
   const [checkValidEmail, setCheckValidEmail] = useState(false);
-
-  const checkPasswordValidity = (value) => {
-    // const isNonWhiteSpace = /^\S*$/;
-    // if (!isNonWhiteSpace.test(value)) {
-    //   return "Password must not contain Whitespaces.";
-    // }
-
-    // const isContainsUppercase = /^(?=.*[A-Z]).*$/;
-    // if (!isContainsUppercase.test(value)) {
-    //   return "Password must have at least one Uppercase Character.";
-    // }
-
-    // const isContainsLowercase = /^(?=.*[a-z]).*$/;
-    // if (!isContainsLowercase.test(value)) {
-    //   return "Password must have at least one Lowercase Character.";
-    // }
-
-    // const isContainsNumber = /^(?=.*[0-9]).*$/;
-    // if (!isContainsNumber.test(value)) {
-    //   return "Password must contain at least one Digit.";
-    // }
-
-    // const isValidLength = /^.{8,16}$/;
-    // if (!isValidLength.test(value)) {
-    //   return "Password must be 8-16 Characters Long.";
-    // }
-
-    // const isContainsSymbol =
-    //   /^(?=.*[~`!@#$%^&*()--+={}\[\]|\\:;"'<>,.?/_₹]).*$/;
-    // if (!isContainsSymbol.test(value)) {
-    //   return 'Password must contain at least one Special Symbol.';
-    // }
-
-    return null;
-  };
+  const [userID, setUserID] = useState("");
+  const [groupID, setGroupID] = useState("");
 
   const handleLogin = () => {
-    const checkPassowrd = checkPasswordValidity(password);
     console.log("in");
     AsyncStorage.setItem("userEmail", email)
       .then(() => {
@@ -68,24 +35,69 @@ export default function Login({ navigation }) {
       .catch((error) => {
         console.error(error);
       });
-    if (!checkPassowrd) {
-      user_login(
-        JSON.stringify({
-          email: email.toLocaleLowerCase(),
-          password: password,
-        })
-      )
-        .then((result) => {
-          if (result.status == 200) {
-            console.log("success");
-            navigation.navigate("FoodBottomTabs");
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    } else {
-      alert(checkPassowrd);
+    user_login(
+      JSON.stringify({
+        email: email.toLocaleLowerCase(),
+        password: password,
+      })
+    )
+      .then((result) => {
+        if (result.status == 200) {
+          console.log("success");
+          // send another Axios request to get the user ID
+          handleGetUserIdDetails().catch((error) => {
+            console.error(error);
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+  const handleGetGroupIdDetails = async () => {
+    const data = JSON.stringify({
+      user_id: userID, // replace with the email of the current user
+    });
+    try {
+      console.log(data);
+      const response = await axios.post(
+        "http://localhost:5000/group_id_from_user_id",
+        data,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      console.log(response.data);
+      setGroupID(response.data.group);
+
+      // Alert.alert("Group Number", `The group number is ${response.data.group}`);
+    } catch (error) {
+      console.log(error);
+      // Alert.alert("Error", "Unable to get group details");
+    }
+  };
+
+  const handleGetUserIdDetails = async () => {
+    const data = JSON.stringify({
+      email: email, // replace with the email of the current user
+    });
+    try {
+      console.log(data);
+      const response = await axios.post(
+        "http://localhost:5000/id_from_email",
+        data,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      setUserID(response.data.user);
+      console.log(userID);
+      console.log(response.data.user);
+    } catch (error) {
+      console.log(error);
+      // Alert.alert("Error", "Unable to get group details");
     }
   };
 
@@ -94,6 +106,22 @@ export default function Login({ navigation }) {
     console.log("Email=>" + email + "Password=>" + password);
     navigation.navigate("FoodBottomTabs");
   };
+
+  useEffect(() => {
+    if (userID !== "") {
+      AsyncStorage.setItem("userID", userID);
+
+      handleGetGroupIdDetails();
+    }
+  }, [userID]);
+
+  useEffect(() => {
+    if (groupID !== "") {
+      AsyncStorage.setItem("groupID", groupID);
+
+      navigation.navigate("FoodBottomTabs");
+    }
+  }, [groupID]);
 
   return (
     <SafeAreaView style={styles.container}>
