@@ -115,12 +115,12 @@ def delete_call():
 def add_group():
     data = request.get_json()
 
-    user_name = data['username']
+    user_name = data['email']
     group_name = data['group_name']
     group_description = data['group_description']
-
+    print(user_name, group_name, group_description)
     user_id_result, success = server_assistent.query_db(
-        'SELECT id FROM users WHERE username=?', (user_name,), True)
+        'SELECT id FROM users WHERE email=?', (user_name,), True)
     if not success or user_id_result is None:
         return jsonify({'status': 'fail', 'message': 'User not found'}), 404
 
@@ -133,7 +133,7 @@ def add_group():
     _, success = server_assistent.query_db('INSERT INTO group_members (group_id, user_id, user_join_to_group) '
                                            'VALUES (?,?,?)', (group_id, user_id, created_date))
     if success:
-        return jsonify({'status': 'success'}), 200
+        return jsonify({'status': 'success', 'group_id': group_id}), 200
     else:
         return jsonify({'status': 'fail'}), 500
 
@@ -205,9 +205,9 @@ def group_id_from_user_id():
             group_id = group_id[0]
             return jsonify({'status': 'success', 'group': group_id}), 200
         else:
-            return jsonify({'status': 'fail', 'message': 'Failed to find this user id'}), 500
+            return jsonify({'status': 'fail', 'message': 'Failed to find this user id'}), 200
     else:
-        return jsonify({'status': 'fail', 'message': 'Failed to find this user id'}), 500
+        return jsonify({'status': 'fail', 'message': 'Failed to find this user id'}), 200
 
 
 @app.route('/add_mission', methods=['POST'])
@@ -331,14 +331,17 @@ def remove_bill():
 def missions_from_group_id():
     data = request.get_json()
     group_id = data['group_id']
-
-    table_data, success = server_assistent.query_db("PRAGMA table_info(missions)")
+    print("asdsad", group_id)
+    table_data, success = server_assistent.query_db(
+        "PRAGMA table_info(missions)")
     column_names = [info[1] for info in table_data]
-    rows, success = server_assistent.query_db('SELECT * FROM missions WHERE group_id=?', (group_id,) )
+    rows, success = server_assistent.query_db(
+        'SELECT * FROM missions WHERE group_id=?', (group_id,))
     rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
 
     json_data = json.dumps(rows_as_dicts)
-    return jsonify(json_data), 200
+    # return jsonify(json_data), 200
+    return json_data, 200
 
 
 @app.route('/outcomes_from_group_id', methods=['POST'])
@@ -346,13 +349,16 @@ def outcomes_from_group_id():
     data = request.get_json()
     group_id = data['group_id']
 
-    table_data, success = server_assistent.query_db("PRAGMA table_info(outcomes)")
+    table_data, success = server_assistent.query_db(
+        "PRAGMA table_info(outcomes)")
     column_names = [info[1] for info in table_data]
-    rows, success = server_assistent.query_db('SELECT * FROM outcomes WHERE group_id=?', (group_id,) )
+    rows, success = server_assistent.query_db(
+        'SELECT * FROM outcomes WHERE group_id=?', (group_id,))
     rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
 
     json_data = json.dumps(rows_as_dicts)
-    return jsonify(json_data), 200
+    return json_data, 200
+
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
     if len(username) < 4:
