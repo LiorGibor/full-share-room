@@ -1,15 +1,5 @@
 import React, { useState } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  Image,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
 import { TextInput } from "react-native-paper";
 import Theme from "../../src/Constants/Theme";
 export default function PasswordComponent({
@@ -19,7 +9,6 @@ export default function PasswordComponent({
   icon,
   keyboardType,
 }) {
-  const [text, setText] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(true);
   return (
     <View>
@@ -39,7 +28,7 @@ export default function PasswordComponent({
         right={
           <TextInput.Icon
             name={passwordVisible ? "eye" : "eye-off"}
-            // onPress={() => setPasswordVisible(!passwordVisible)}
+            onPress={() => setPasswordVisible(!passwordVisible)}
           />
         }
       />

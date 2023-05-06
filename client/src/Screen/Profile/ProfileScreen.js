@@ -7,8 +7,6 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
-import Feather from "@expo/vector-icons/Feather";
-// import ManageTasks from "./Functions/ManageTasks";
 
 export default function ProfileScreen({ navigation }) {
   const handleNavigate = (screen) => {

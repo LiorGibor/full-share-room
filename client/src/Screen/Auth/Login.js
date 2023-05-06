@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { HelperText } from "react-native-paper";
 import {
   SafeAreaView,
   StyleSheet,
