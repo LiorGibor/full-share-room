@@ -310,6 +310,26 @@ def add_bill():
         return jsonify({'status': 'fail', 'message': 'Failed to add to DB'}), 500
 
 
+@app.route('/add_notification', methods=['POST'])
+def add_notification():
+    data = request.get_json()
+    group_id = data['group_id']
+    user_id = data['user_id']
+    notification_name = data['notification_name']
+    created_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    notification_id, success = server_assistent.query_db(
+        'INSERT INTO notifications (group_id, user_id, notification_name, '
+        'created_date) VALUES (?,?,?,?)',
+        (group_id, user_id, notification_name, created_date), True)
+    if success:
+        if notification_id:
+            return jsonify({'status': 'success', 'notification_id': notification_id}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'Failed to insert this bills'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to add to DB'}), 500
+
+
 @app.route('/remove_bill', methods=['POST'])
 def remove_bill():
     data = request.get_json()
@@ -318,6 +338,23 @@ def remove_bill():
 
     deleted_row, success = server_assistent.query_db(
         'DELETE FROM bills WHERE bill_id = ?', (bill_id,), True)
+    if success:
+        if deleted_row:
+            return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'no row deleted'}), 500
+    else:
+        return jsonify({'status': 'fail', 'message': 'Failed to connect to DB'}), 500
+
+
+@app.route('/remove_notification', methods=['POST'])
+def remove_notification():
+    data = request.get_json()
+
+    notification_id = data['notification_id']
+
+    deleted_row, success = server_assistent.query_db(
+        'DELETE FROM notifications WHERE notification_id = ?', (notification_id,), True)
     if success:
         if deleted_row:
             return jsonify({'status': 'success'}), 200
@@ -359,6 +396,49 @@ def outcomes_from_group_id():
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
 
+
+@app.route('/notifications_from_group_id', methods=['POST'])
+def notifications_from_group_id():
+    data = request.get_json()
+    group_id = data['group_id']
+
+    table_data, success = server_assistent.query_db(
+        "PRAGMA table_info(notifications)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        'SELECT * FROM notifications WHERE group_id=?', (group_id,))
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
+
+
+@app.route('/user_name_from_id', methods=['POST'])
+def user_name_from_id():
+    data = request.get_json()
+    user_id = data['user_id']
+    user_name, success = server_assistent.query_db('SELECT fullName FROM users WHERE id=?', (user_id,), True)
+    if success:
+        if user_name:
+            return jsonify({'status': 'success', 'user_name': user_name[0]}), 200
+        else:
+            return jsonify({'status': 'fail'}), 400
+    else:
+        return jsonify({'status': 'fail'}), 400
+
+
+@app.route('/group_name_from_id', methods=['POST'])
+def group_name_from_id():
+    data = request.get_json()
+    group_id = data['group_id']
+    group_name, success = server_assistent.query_db('SELECT group_name FROM groups WHERE group_id=?', (group_id,), True)
+    if success:
+        if group_name:
+            return jsonify({'status': 'success', 'group_name': group_name[0]}), 200
+        else:
+            return jsonify({'status': 'fail'}), 400
+    else:
+        return jsonify({'status': 'fail'}), 400
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):

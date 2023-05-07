@@ -14,6 +14,7 @@ def init_db():
     create_missions_table()
     create_bills_table()
     create_outcomes_table()
+    create_notifications_table()
 
 
 def create_users_table():
@@ -143,6 +144,25 @@ def create_outcomes_table():
                     outcome_description TEXT,
                     amount REAL NOT NULL,
                     outcome_date TIMESTAMP,
+                    created_date TIMESTAMP NOT NULL,
+
+                    FOREIGN KEY (group_id) REFERENCES group_members (group_id),
+                    FOREIGN KEY (user_id) REFERENCES group_members (user_id)
+                )''')
+
+    conn.commit()
+    conn.close()
+
+
+def create_notifications_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS notifications (
+                    notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    group_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL,
+                    notification_name TEXT NOT NULL,
                     created_date TIMESTAMP NOT NULL,
 
                     FOREIGN KEY (group_id) REFERENCES group_members (group_id),
