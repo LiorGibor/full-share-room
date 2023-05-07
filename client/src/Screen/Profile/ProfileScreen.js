@@ -7,11 +7,10 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
-import Feather from "@expo/vector-icons/Feather";
-// import ManageTasks from "./Functions/ManageTasks";
 
 export default function ProfileScreen({ navigation }) {
   const handleNavigate = (screen) => {
+    console.log(screen);
     navigation.navigate(screen);
   };
 
@@ -34,11 +33,18 @@ export default function ProfileScreen({ navigation }) {
             resizeMode={"cover"}
           />
         </TouchableOpacity>
-        <Text style={styles.textDesign}>Lior Miamon</Text>
         <View style={{ flex: 1 }} />
-        <Feather name="edit" size={25} color="#000" />
+        <TouchableOpacity onPress={() => window.location.reload()}>
+          <Image
+            style={styles.image}
+            source={{
+              uri: "https://thumbs.dreamstime.com/b/logout-isolated-special-cyan-blue-round-button-abstract-illustration-logout-special-cyan-blue-round-button-103957079.jpg",
+            }}
+            resizeMode={"cover"}
+          />
+        </TouchableOpacity>{" "}
       </View>
-      <Text style={styles.textStyle}>Conversation</Text>
+      <Text style={styles.textStyle}>Menu</Text>
       {/* Render all the buttons below */}
       <ScrollView>
         <View
@@ -55,7 +61,7 @@ export default function ProfileScreen({ navigation }) {
             onPress={() => handleNavigate("ManageTasks")}
           >
             <Text numberOfLines={2} style={styles.textBox}>
-              Mange Task
+              Manage Task
             </Text>
           </TouchableOpacity>
           <View style={{ flex: 1 }}></View>

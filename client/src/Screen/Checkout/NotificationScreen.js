@@ -13,15 +13,14 @@ import {
 import ItemCart from "./CartItem/ItemCart";
 const DATA = [
   {
-    title: "Ido send you a friend request",
-    text: "hi kay",
-    price: "130",
+    title: "Ido added a new expense",
+
     image:
       "https://media.istockphoto.com/id/1338134336/photo/headshot-portrait-african-30s-man-smile-look-at-camera.jpg?b=1&s=170667a&w=0&k=20&c=j-oMdWCMLx5rIx-_W33o3q3aW9CiAWEvv9XrJQ3fTMU=",
     icon: "https://image.shutterstock.com/image-vector/phone-icon-vector-call-telephone-260nw-1721247196.jpg",
   },
   {
-    title: "Ido send you a friend request",
+    title: "Lior send you a friend request",
     text: "I am fine",
     price: "280",
     image:

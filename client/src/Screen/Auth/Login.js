@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { HelperText } from "react-native-paper";
 import {
   SafeAreaView,
   StyleSheet,
@@ -101,13 +100,9 @@ export default function Login({ navigation }) {
     }
   };
 
-  const loginFun = () => {
-    //Here is your email and password you can send from here
-    console.log("Email=>" + email + "Password=>" + password);
-    navigation.navigate("FoodBottomTabs");
-  };
-
   useEffect(() => {
+    console.log("groupID", groupID);
+
     if (userID !== "") {
       AsyncStorage.setItem("userID", userID);
 
@@ -118,7 +113,6 @@ export default function Login({ navigation }) {
   useEffect(() => {
     if (groupID !== "") {
       AsyncStorage.setItem("groupID", groupID);
-
       navigation.navigate("FoodBottomTabs");
     }
   }, [groupID]);

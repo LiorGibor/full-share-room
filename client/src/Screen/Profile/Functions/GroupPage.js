@@ -37,6 +37,23 @@ const GroupPage = ({ navigation }) => {
   //   }
   // };
 
+  const handleCreateNewGroup = async () => {
+    try {
+      const data = { email, group_name: "Asdasd", group_description: "Aaa" };
+      const response = await axios.post(
+        "http://localhost:5000/add_group",
+        data
+      );
+      if (response.status === 200) {
+        Alert.alert("Success", "Group created successfully");
+        console.log("Asd", response.group_id);
+        setGroupID(response.group_id);
+      }
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "Unable to create  group");
+    }
+  };
   const handleGetGroupIdDetails = () => {
     // setGroupID(response.data.group);
     console.log("groupID", groupID);
@@ -90,12 +107,11 @@ const GroupPage = ({ navigation }) => {
         >
           <Text style={styles.buttonText}>Get Group Details</Text>
         </TouchableOpacity>
-        {groupID ? (
-          <View style={styles.groupIDContainer}>
-            <Text style={styles.groupIDLabel}>Group Number:</Text>
-            <Text style={styles.groupID}>{groupID}</Text>
-          </View>
-        ) : null}
+
+        <View style={styles.groupIDContainer}>
+          <Text style={styles.groupIDLabel}>Group Number:</Text>
+          <Text style={styles.groupID}>{groupID}</Text>
+        </View>
       </View>
       <View style={styles.header}>
         <Text style={styles.title}>Join Existing Group</Text>
@@ -112,6 +128,9 @@ const GroupPage = ({ navigation }) => {
           onPress={handleJoinExistingGroup}
         >
           <Text style={styles.buttonText}>Join Existing Group</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleCreateNewGroup}>
+          <Text style={styles.buttonText}>Create New Group</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity

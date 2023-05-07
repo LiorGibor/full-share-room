@@ -18,7 +18,7 @@ function FoodBottomTabs({ route }) {
   return (
     <Tab.Navigator
       //First screen will be home all the time
-      initialRouteName="Home"
+      initialRouteName="Profile"
       screenOptions={{
         tabBarActiveTintColor: Theme.primary,
         headerShown: false,
