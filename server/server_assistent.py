@@ -5,6 +5,23 @@ import secrets
 
 DATABASE = 'server.db'
 
+def get_db_connection():
+    return sqlite3.connect(DATABASE)
+
+def start_connection():
+    conn = get_db_connection()
+    return conn.cursor()
+
+def finish_connection():
+    conn = get_db_connection()
+    conn.commit()
+    conn.close()
+
+def create_table(create_table_string):
+    cur = start_connection()
+    cur.execute(create_table_string)
+    finish_connection()
+
 
 def init_db():
     create_users_table()
@@ -18,10 +35,7 @@ def init_db():
 
 
 def create_users_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS users (
+    create_table('''CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             username TEXT NOT NULL,
                             hashedPassword TEXT NOT NULL,
@@ -35,29 +49,17 @@ def create_users_table():
                             role TEXT NOT NULL
                         )''')
 
-    conn.commit()
-    conn.close()
-
 
 def create_groups_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS `groups` (
+    create_table('''CREATE TABLE IF NOT EXISTS `groups` (
                         group_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         group_name TEXT NOT NULL,
                         group_details TEXT
                     )''')
 
-    conn.commit()
-    conn.close()
-
 
 def create_group_members_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS group_members (
+    create_table('''CREATE TABLE IF NOT EXISTS group_members (
                     group_member_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
@@ -69,15 +71,9 @@ def create_group_members_table():
                     UNIQUE(group_id, user_id)
                 )''')
 
-    conn.commit()
-    conn.close()
-
 
 def create_faults_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS faults (
+    create_table('''CREATE TABLE IF NOT EXISTS faults (
                     fault_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     fault_name TEXT NOT NULL,
@@ -88,15 +84,9 @@ def create_faults_table():
                     FOREIGN KEY (group_id) REFERENCES groups (group_id)
                 )''')
 
-    conn.commit()
-    conn.close()
-
 
 def create_missions_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS missions (
+    create_table('''CREATE TABLE IF NOT EXISTS missions (
                     mission_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     mission_name TEXT NOT NULL,
@@ -107,15 +97,10 @@ def create_missions_table():
                     FOREIGN KEY (group_id) REFERENCES groups (group_id)
                 )''')
 
-    conn.commit()
-    conn.close()
 
 
 def create_bills_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS bills (
+    create_table('''CREATE TABLE IF NOT EXISTS bills (
                     bill_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER,
@@ -128,15 +113,9 @@ def create_bills_table():
                     FOREIGN KEY (user_id) REFERENCES group_members (user_id)
                 )''')
 
-    conn.commit()
-    conn.close()
-
 
 def create_outcomes_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS outcomes (
+    create_table('''CREATE TABLE IF NOT EXISTS outcomes (
                     outcome_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
@@ -150,15 +129,10 @@ def create_outcomes_table():
                     FOREIGN KEY (user_id) REFERENCES group_members (user_id)
                 )''')
 
-    conn.commit()
-    conn.close()
 
 
 def create_notifications_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS notifications (
+    create_table('''CREATE TABLE IF NOT EXISTS notifications (
                     notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
@@ -169,14 +143,10 @@ def create_notifications_table():
                     FOREIGN KEY (user_id) REFERENCES group_members (user_id)
                 )''')
 
-    conn.commit()
-    conn.close()
-
 
 def query_db(query, args=(), one=False):
     try:
-        conn = sqlite3.connect(DATABASE)
-        cur = conn.cursor()
+        cur = start_connection()
         cur.execute(query, args)
         if query.strip().upper().startswith("INSERT"):
             last_row_id = cur.lastrowid
