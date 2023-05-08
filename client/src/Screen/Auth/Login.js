@@ -23,6 +23,7 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState(""); // In this state whatever password you write will be stored you can use it for sending to server
   const [checkValidEmail, setCheckValidEmail] = useState(false);
   const [userID, setUserID] = useState("");
+  const [userName, setUserName] = useState("");
   const [groupID, setGroupID] = useState("");
 
   const handleLogin = () => {
@@ -100,12 +101,33 @@ export default function Login({ navigation }) {
     }
   };
 
+  const handleGetUserNameDetails = async () => {
+    const data = JSON.stringify({
+      user_id: userID, // replace with the email of the current user
+    });
+    try {
+      console.log(data);
+      const response = await axios.post(
+        "http://localhost:5000/user_name_from_id",
+        data,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      console.log("ASdasdasd", response.data);
+      setUserName(response.data.user_name);
+    } catch (error) {
+      console.log(error);
+      // Alert.alert("Error", "Unable to get group details");
+    }
+  };
+
   useEffect(() => {
     console.log("groupID", groupID);
 
     if (userID !== "") {
       AsyncStorage.setItem("userID", userID);
-
+      handleGetUserNameDetails();
       handleGetGroupIdDetails();
     }
   }, [userID]);
@@ -113,6 +135,9 @@ export default function Login({ navigation }) {
   useEffect(() => {
     if (groupID !== "") {
       AsyncStorage.setItem("groupID", groupID);
+      console.log("username is ", userName);
+
+      AsyncStorage.setItem("userName", userName);
       navigation.navigate("FoodBottomTabs");
     }
   }, [groupID]);

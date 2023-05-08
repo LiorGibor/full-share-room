@@ -35,6 +35,7 @@ const SplitPayments = () => {
   const [debts, setDebts] = useState({});
   const [groupID, setGroupID] = useState("");
   const [userID, setUserID] = useState("");
+  const [userName, setUserName] = useState("");
 
   const calculateDebts = () => {
     const debts = {};
@@ -65,6 +66,7 @@ const SplitPayments = () => {
         headers: { "Content-Type": "application/json" },
       });
       fetchExpenses();
+      addNotification();
     } catch (error) {
       console.error(error);
     }
@@ -87,6 +89,22 @@ const SplitPayments = () => {
       console.error(error);
     }
   };
+
+  const addNotification = async () => {
+    const data = JSON.stringify({
+      group_id: groupID,
+      user_id: userID,
+      notification_name: `${userName} added new expense on ${newExpense.name} in the amount of  ${newExpense.amount}`,
+    });
+    try {
+      await axios.post("http://localhost:5000/add_notification", data, {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     const fetchGroupID = async () => {
       const storedGroupID = await AsyncStorage.getItem("groupID");
@@ -96,8 +114,14 @@ const SplitPayments = () => {
       const storedUserID = await AsyncStorage.getItem("userID");
       setUserID(storedUserID);
     };
-    fetchGroupID();
+    const fetchUserName = async () => {
+      const storedUserName = await AsyncStorage.getItem("userName");
+      setUserName(storedUserName);
+    };
+
     fetchUserID();
+    fetchGroupID();
+    fetchUserName();
   }, []);
 
   useEffect(() => {
