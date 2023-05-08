@@ -413,6 +413,22 @@ def notifications_from_group_id():
     return json_data, 200
 
 
+@app.route('/faults_from_group_id', methods=['POST'])
+def faults_from_group_id():
+    data = request.get_json()
+    group_id = data['group_id']
+
+    table_data, success = server_assistent.query_db(
+        "PRAGMA table_info(faults)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        'SELECT * FROM faults WHERE group_id=?', (group_id,))
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
+
+
 @app.route('/user_name_from_id', methods=['POST'])
 def user_name_from_id():
     data = request.get_json()
