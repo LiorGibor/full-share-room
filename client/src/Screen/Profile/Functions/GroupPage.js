@@ -83,13 +83,17 @@ const GroupPage = ({ navigation }) => {
       })
       .then(
         AsyncStorage.getItem("groupID").then((groupID) => {
-          setGroupID(groupID);
+          if (groupID !== "") setGroupID(groupID);
         })
       )
       .catch((error) => {
         console.error(error);
       });
   }, []);
+
+  useEffect(() => {
+    // add the groupID state as a dependency here
+  }, [groupID]);
 
   // useEffect(() => {
   //   handleGetUserIdDetails();

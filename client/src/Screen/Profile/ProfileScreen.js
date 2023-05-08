@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -7,12 +7,26 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen({ navigation }) {
+  const [userName, setUserName] = useState("asd");
+
   const handleNavigate = (screen) => {
     console.log(screen);
     navigation.navigate(screen);
   };
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const storedUserName = await AsyncStorage.getItem("userName");
+      console.log("storedUserName", storedUserName);
+
+      setUserName(storedUserName);
+    };
+
+    fetchUserName();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -33,6 +47,7 @@ export default function ProfileScreen({ navigation }) {
             resizeMode={"cover"}
           />
         </TouchableOpacity>
+        <Text style={styles.textStyle}>{userName}</Text>
         <View style={{ flex: 1 }} />
         <TouchableOpacity onPress={() => window.location.reload()}>
           <Image

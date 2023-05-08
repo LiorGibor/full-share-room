@@ -17,6 +17,9 @@ import { useNavigation } from "@react-navigation/native";
 
 const ManageTasks = () => {
   const [groupID, setGroupID] = useState("");
+  const [userID, setUserID] = useState("");
+  const [userName, setUserName] = useState("");
+  const [notificationText, setNotificationText] = useState("");
   const [taskName, setTaskName] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [tasks, setTasks] = useState([]);
@@ -55,6 +58,22 @@ const ManageTasks = () => {
       setTaskName("");
       setTaskDescription("");
       loadTasks();
+      addNotification();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const addNotification = async () => {
+    const data = JSON.stringify({
+      group_id: groupID,
+      user_id: userID,
+      notification_name: `${userName} added new task - ${taskName}`,
+    });
+    try {
+      await axios.post("http://localhost:5000/add_notification", data, {
+        headers: { "Content-Type": "application/json" },
+      });
     } catch (error) {
       console.error(error);
     }
@@ -89,7 +108,18 @@ const ManageTasks = () => {
       const storedGroupID = await AsyncStorage.getItem("groupID");
       setGroupID(storedGroupID);
     };
+    const fetchUserID = async () => {
+      const storedUserID = await AsyncStorage.getItem("userID");
+      setUserID(storedUserID);
+    };
+    const fetchUserName = async () => {
+      const storedUserName = await AsyncStorage.getItem("userName");
+      setUserName(storedUserName);
+    };
+
+    fetchUserID();
     fetchGroupID();
+    fetchUserName();
   }, []);
 
   useEffect(() => {
