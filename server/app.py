@@ -433,7 +433,8 @@ def faults_from_group_id():
 def user_name_from_id():
     data = request.get_json()
     user_id = data['user_id']
-    user_name, success = server_assistent.query_db('SELECT fullName FROM users WHERE id=?', (user_id,), True)
+    user_name, success = server_assistent.query_db(
+        'SELECT fullName FROM users WHERE id=?', (user_id,), True)
     if success:
         if user_name:
             return jsonify({'status': 'success', 'user_name': user_name[0]}), 200
@@ -447,7 +448,8 @@ def user_name_from_id():
 def group_name_from_id():
     data = request.get_json()
     group_id = data['group_id']
-    group_name, success = server_assistent.query_db('SELECT group_name FROM groups WHERE group_id=?', (group_id,), True)
+    group_name, success = server_assistent.query_db(
+        'SELECT group_name FROM groups WHERE group_id=?', (group_id,), True)
     if success:
         if group_name:
             return jsonify({'status': 'success', 'group_name': group_name[0]}), 200
