@@ -147,8 +147,11 @@ const SplitPayments = () => {
         />
         <View style={styles.table}>
           <View style={styles.row}>
-            <Text style={styles.cellHeader}>Name</Text>
-            <Text style={styles.cellHeader}>Amount</Text>
+            <Text style={styles.cellHeader}>Name </Text>
+            <Text style={styles.cellHeader}> </Text>
+            <Text style={styles.cellHeader}>Amount </Text>
+            <Text style={styles.cellHeader}> </Text>
+
             <Text style={styles.cellHeader}>User</Text>
           </View>
           {expenses.map((expense, index) => (

@@ -18,7 +18,7 @@ function FoodBottomTabs({ route }) {
   return (
     <Tab.Navigator
       //First screen will be home all the time
-      initialRouteName="Profile"
+      initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: Theme.primary,
         headerShown: false,
@@ -27,12 +27,12 @@ function FoodBottomTabs({ route }) {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={ProfileScreen}
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ color, size }) => (
             //This is the icon use for Home in bottom tab
-            <MaterialCommunityIcons name="home" color={color} size={size} />
+            <FontAwesome5 name="user-alt" color={color} size={size} />
           ),
         }}
       />
@@ -40,7 +40,7 @@ function FoodBottomTabs({ route }) {
         name="Messeage"
         component={ChatList}
         options={{
-          tabBarLabel: "Messeage",
+          tabBarLabel: "Chat",
           tabBarIcon: ({ color, size }) => (
             //This is the icon use for Message in bottom tab
             <AntDesign name="message1" color={color} size={size} />
@@ -60,12 +60,12 @@ function FoodBottomTabs({ route }) {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={HomeScreen}
         options={{
-          tabBarLabel: "Profile",
+          tabBarLabel: "Appartements",
           tabBarIcon: ({ color, size }) => (
             //This is the icon use for Profile in bottom tab
-            <FontAwesome5 name="user-alt" color={color} size={size} />
+            <FontAwesome5 name="home" color={color} size={size} />
           ),
         }}
       />

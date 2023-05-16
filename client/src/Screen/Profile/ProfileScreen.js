@@ -11,6 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen({ navigation }) {
   const [userName, setUserName] = useState("asd");
+  const [groupID, setGroupID] = useState("");
 
   const handleNavigate = (screen) => {
     console.log(screen);
@@ -25,19 +26,23 @@ export default function ProfileScreen({ navigation }) {
       setUserName(storedUserName);
     };
 
+    const fetchGroupID = async () => {
+      const storedGroupID = await AsyncStorage.getItem("groupID");
+      setGroupID(storedGroupID);
+      // call loadFaults() when groupID is loaded
+    };
+
+    fetchGroupID();
     fetchUserName();
   }, []);
 
+  useEffect(() => {
+    console.log("This is groupID", groupID);
+  }, [groupID]);
+
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          margin: 16,
-        }}
-      >
-        {/* Below is Profile picture and name of the user that will be dynamic from api */}
+      <View style={{ flexDirection: "row", alignItems: "center", margin: 16 }}>
         <TouchableOpacity>
           <Image
             style={styles.image}
@@ -72,8 +77,13 @@ export default function ProfileScreen({ navigation }) {
           }}
         >
           <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleNavigate("ManageTasks")}
+            style={[
+              styles.box,
+              { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
+            ]}
+            onPress={() => {
+              groupID !== "undefined" ? handleNavigate("ManageTasks") : null;
+            }}
           >
             <Text numberOfLines={2} style={styles.textBox}>
               Manage Task
@@ -81,8 +91,13 @@ export default function ProfileScreen({ navigation }) {
           </TouchableOpacity>
           <View style={{ flex: 1 }}></View>
           <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleNavigate("ApplyRequest")}
+            style={[
+              styles.box,
+              { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
+            ]}
+            onPress={() => {
+              groupID !== "undefined" ? handleNavigate("ManageTasks") : null;
+            }}
           >
             <Text style={styles.textBox}>
               Opening a new call for the apartment owner
@@ -99,17 +114,27 @@ export default function ProfileScreen({ navigation }) {
           }}
         >
           <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleNavigate("SplitPayments")}
+            style={[
+              styles.box,
+              { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
+            ]}
+            onPress={() => {
+              groupID !== "undefined" ? handleNavigate("ManageTasks") : null;
+            }}
           >
             <Text numberOfLines={2} style={styles.textBox}>
-              Mange Outcomes
+              Manage Outcomes
             </Text>
           </TouchableOpacity>
           <View style={{ flex: 1 }}></View>
           <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleNavigate("UploadDocumentPage")}
+            style={[
+              styles.box,
+              { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
+            ]}
+            onPress={() => {
+              groupID !== "undefined" ? handleNavigate("ManageTasks") : null;
+            }}
           >
             <Text style={styles.textBox}>Upload Documents</Text>
           </TouchableOpacity>
@@ -123,26 +148,29 @@ export default function ProfileScreen({ navigation }) {
             marginHorizontal: 20,
           }}
         >
-          <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleNavigate("UploadDocumentPage")}
-          >
-            <Text numberOfLines={2} style={styles.textBox}>
-              Smart Devices Integration
-            </Text>
-          </TouchableOpacity>
           <View style={{ flex: 1 }}></View>
           <TouchableOpacity
-            style={styles.box}
-            onPress={() => handleNavigate("GroupPage")}
+            style={[styles.box, { backgroundColor: "#B4C7E7" }]}
+            onPress={() => {
+              handleNavigate("ManageTasks");
+            }}
           >
             <Text style={styles.textBox}>Join Group</Text>
           </TouchableOpacity>
         </View>
+        <br></br>
+        <br></br>
+        <br></br>
+        {groupID === "undefined" ? (
+          <Text style={styles.textBox}>
+            First join group and than the functions will be available{" "}
+          </Text>
+        ) : null}
       </ScrollView>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
@@ -154,7 +182,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 15,
     paddingHorizontal: 20,
-    backgroundColor: "#B4C7E7",
     borderRadius: 10,
     width: 150,
     shadowColor: "grey",
@@ -163,17 +190,11 @@ const styles = StyleSheet.create({
     elevation: 8,
     height: 150,
   },
-
   image: {
     height: 50,
     width: 50,
     borderRadius: 50,
     resizeMode: "cover",
-  },
-  textCostum: {
-    alignContent: "center",
-    flex: 1,
-    flexDirection: "row",
   },
   textStyle: {
     color: "#000",
@@ -186,11 +207,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
-  },
-  textDesign: {
-    color: "black",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginStart: 15,
   },
 });

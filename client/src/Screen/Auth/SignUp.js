@@ -105,7 +105,7 @@ export default function SignUp({ navigation }) {
         {/* Signup Button*/}
         <TouchableOpacity onPress={() => SignUp()}>
           <ButtonComponent
-            label="Sign UP"
+            label="Sign Up"
             backgroundColor={Theme.green}
             marginLeft={20}
             marginRight={20}
@@ -115,16 +115,16 @@ export default function SignUp({ navigation }) {
             onPress={() => signUpFun()}
           />
         </TouchableOpacity>
-        <ButtonComponent
+        {/* <ButtonComponent
           label="Or Sign Up with:"
           backgroundColor={Theme.black}
           marginLeft={20}
           marginRight={20}
           labelColor={Theme.white}
-        />
+        /> */}
       </View>
       {/* Facebook and Google Button Wrapper including Buttons */}
-      <View
+      {/* <View
         style={{
           justifyContent: "center",
           flexDirection: "row",
@@ -135,7 +135,7 @@ export default function SignUp({ navigation }) {
         <Entypo name="facebook-with-circle" size={50} color="#1877F2"></Entypo>
         <View style={{ marginHorizontal: 20 }}></View>
         <Ionicons name="logo-google" size={50} color="#1877F2"></Ionicons>
-      </View>
+      </View> */}
       <View
         style={{
           flexDirection: "row",

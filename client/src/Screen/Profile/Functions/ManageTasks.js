@@ -163,12 +163,10 @@ const ManageTasks = () => {
         renderItem={({ item }) => <TaskItem item={item} />}
       />
 
-      <TouchableOpacity
-        style={styles.navButton}
+      <Button
+        title="Home"
         onPress={() => navigation.navigate("FoodBottomTabs")}
-      >
-        <Text style={styles.navButtonText}>Home</Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 };

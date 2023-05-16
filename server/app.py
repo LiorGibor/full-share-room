@@ -460,20 +460,20 @@ def group_name_from_id():
 
 
 def validate_new_user(username, password, email, full_name, date_of_birth):
-    if len(username) < 4:
-        return jsonify({'status': 'Username must be at least 4 characters'}), 400
-    if len(password) < 8:
-        return jsonify({'status': 'Password must be at least 8 characters'}), 400
-    if len(email) < 5:
-        return jsonify({'status': 'Email must be at least 5 characters'}), 400
-    if '@' not in email:
-        return jsonify({'status': 'Email must contain @'}), 400
-    if '.' not in email:
-        return jsonify({'status': 'Email must contain .'}), 400
-    if len(full_name) < 5:
-        return jsonify({'status': 'Full name must be at least 5 characters'}), 400
-    if len(date_of_birth) < 5:
-        return jsonify({'status': 'Date of birth must be at least 5 characters'}), 400
+    # if len(username) < 4:
+    #     return jsonify({'status': 'Username must be at least 4 characters'}), 400
+    # if len(password) < 8:
+    #     return jsonify({'status': 'Password must be at least 8 characters'}), 400
+    # if len(email) < 5:
+    #     return jsonify({'status': 'Email must be at least 5 characters'}), 400
+    # if '@' not in email:
+    #     return jsonify({'status': 'Email must contain @'}), 400
+    # if '.' not in email:
+    #     return jsonify({'status': 'Email must contain .'}), 400
+    # if len(full_name) < 5:
+    #     return jsonify({'status': 'Full name must be at least 5 characters'}), 400
+    # if len(date_of_birth) < 5:
+    #     return jsonify({'status': 'Date of birth must be at least 5 characters'}), 400
     return True
 
 

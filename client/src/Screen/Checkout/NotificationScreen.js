@@ -35,18 +35,13 @@ export default function NotificationScreen({ navigation }) {
             headers: { "Content-Type": "application/json" },
           }
         );
-        console.log("current user ID is", userID);
-        console.log(response.data);
         const filteredNotifications = response.data.filter(
           (notification) => String(notification.user_id) !== userID
         );
-        console.log(filteredNotifications);
-
         const filteredTitles = filteredNotifications.map(
           (notification) => notification.notification_name
         );
         setFilteredTitles(filteredTitles);
-        console.log(filteredTitles);
       } catch (error) {
         console.error(error);
       }
@@ -56,16 +51,21 @@ export default function NotificationScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
-        <Text style={styles.textStyle}>Notification</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Notifications</Text>
       </View>
-      {/* Here we're using FlatList to display our data from the database */}
-      <FlatList
-        style={{ marginEnd: 10, marginEnd: 10 }}
-        data={filteredTitles}
-        renderItem={({ item }) => <Text>{item}</Text>}
-        keyExtractor={(item) => item.id}
-      />
+      <View style={styles.content}>
+        <FlatList
+          data={filteredTitles}
+          renderItem={({ item }) => (
+            <View style={styles.notificationContainer}>
+              <Text style={styles.notificationTitle}>{item}</Text>
+            </View>
+          )}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -75,12 +75,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F9F6",
   },
-
-  textStyle: {
-    color: "#000",
+  header: {
+    height: 60,
+    backgroundColor: "#1E90FF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5E5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 15,
+    color: "#000",
+  },
+  content: {
+    flex: 1,
+  },
+  notificationContainer: {
+    backgroundColor: "#FFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5E5",
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+  },
+  notificationTitle: {
+    fontSize: 16,
+    color: "#000",
+  },
+  listContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
 });

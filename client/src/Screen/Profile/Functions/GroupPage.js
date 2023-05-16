@@ -15,6 +15,11 @@ const GroupPage = ({ navigation }) => {
   const [groupID, setGroupID] = useState("");
   const [email, setEmail] = useState("");
 
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleFocus = () => setIsFocused(true);
+  const handleBlur = () => setIsFocused(false);
+
   // const handleGetUserIdDetails = async () => {
   //   const data = JSON.stringify({
   //     email: email, // replace with the email of the current user
@@ -46,8 +51,9 @@ const GroupPage = ({ navigation }) => {
       );
       if (response.status === 200) {
         Alert.alert("Success", "Group created successfully");
-        console.log("Asd", response.group_id);
-        setGroupID(response.group_id);
+        console.log("Asd", response.data);
+        setGroupID(response.data.group_id);
+        AsyncStorage.setItem("groupID", response.data.group_id);
       }
     } catch (error) {
       console.log(error);
@@ -69,6 +75,7 @@ const GroupPage = ({ navigation }) => {
       );
       if (response.status === 200) {
         Alert.alert("Success", "User added successfully");
+        AsyncStorage.setItem("groupID", groupID);
       }
     } catch (error) {
       console.log(error);
@@ -122,10 +129,13 @@ const GroupPage = ({ navigation }) => {
       </View>
       <View style={styles.content}>
         <TextInput
-          style={styles.textInput}
+          style={[styles.textInput, isFocused && styles.focused]}
           placeholder="Group Number"
+          placeholderTextColor="#999"
           onChangeText={setGroupID}
           value={groupID}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
         />
         <TouchableOpacity
           style={styles.button}

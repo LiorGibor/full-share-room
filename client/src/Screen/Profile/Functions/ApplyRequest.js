@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
@@ -16,7 +17,10 @@ const ApplyRequest = () => {
   const [subject, setSubject] = useState("");
   const [summary, setSummary] = useState("");
   const [email, setEmail] = useState("");
+  const [groupID, setGroupID] = useState("");
   const [fileUri, setFileUri] = useState(null);
+  const [faults, setFaults] = useState([]);
+  const [openCallSuccess, setOpenCallSuccess] = useState(false);
 
   const navigation = useNavigation();
 
@@ -37,6 +41,24 @@ const ApplyRequest = () => {
       });
   }, []);
 
+  const loadFaults = async () => {
+    const data = JSON.stringify({
+      group_id: groupID,
+    });
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/faults_from_group_id",
+        data,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      setFaults(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleSubmit = async () => {
     const data = JSON.stringify({
       email: email, // replace with the email of the current user
@@ -54,53 +76,107 @@ const ApplyRequest = () => {
         }
       );
       console.log(response.data); // handle success response
+      setOpenCallSuccess(true);
     } catch (error) {
       console.log(error); // handle error response
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Apply Request</Text>
+  useEffect(() => {
+    const fetchGroupID = async () => {
+      const storedGroupID = await AsyncStorage.getItem("groupID");
+      setGroupID(storedGroupID);
+      // call loadFaults() when groupID is loaded
+    };
 
-      <View style={styles.field}>
-        <Text style={styles.label}>Subject:</Text>
-        <TextInput
-          style={styles.input}
-          value={subject}
-          onChangeText={setSubject}
-        />
+    fetchGroupID();
+  }, []);
+
+  useEffect(() => {
+    if (openCallSuccess) {
+      loadFaults();
+      setOpenCallSuccess(false);
+    }
+  }, [openCallSuccess]);
+
+  useEffect(() => {
+    loadFaults();
+  }, [groupID]);
+
+  const FaultItem = ({ item, fieldName }) => (
+    <View style={styles.taskItem}>
+      <View>
+        <Text style={styles.taskName}>
+          {fieldName}: {item.fault_name}
+        </Text>
+        <Text style={styles.taskDescription}>
+          Description: {item.fault_description}
+        </Text>
+        <Text style={styles.taskDescription}>Created: {item.created_date}</Text>
+        <Text style={styles.taskDescription}>Status: {item.fixed}</Text>
       </View>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Summary:</Text>
-        <TextInput
-          style={[styles.input, styles.summaryInput]}
-          value={summary}
-          onChangeText={setSummary}
-          multiline
-          numberOfLines={4}
-        />
-      </View>
-
-      <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
-        <Text style={styles.uploadButtonText}>Upload File</Text>
-      </TouchableOpacity>
-      {fileUri && (
-        <Text style={styles.fileUri}>{fileUri.split("/").pop()}</Text>
-      )}
-
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Submit</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.navButton}
-        onPress={() => navigation.navigate("FoodBottomTabs")}
-      >
-        <Text style={styles.navButtonText}>Home</Text>
-      </TouchableOpacity>
     </View>
+  );
+
+  return (
+    <UserContext.Consumer>
+      {(value) => (
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.headerText}>Open Call</Text>
+          </View>{" "}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Subject"
+              onChangeText={(text) => setSubject(text)}
+              value={subject}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Summary"
+              onChangeText={(text) => setSummary(text)}
+              value={summary}
+              multiline={true}
+              numberOfLines={4}
+            />
+
+            <TouchableOpacity style={styles.fileButton} onPress={pickDocument}>
+              <Text style={styles.fileButtonText}>Attach file</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+            >
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
+            <br></br>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={() => navigation.navigate("FoodBottomTabs")}
+            >
+              <Text style={styles.submitButtonText}>Home</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.faultsContainer}>
+            <Text style={styles.faultsHeaderText}>Faults:</Text>
+            <FlatList
+              data={faults}
+              keyExtractor={(item) => item.fault_id.toString()}
+              renderItem={({ item }) => (
+                <FaultItem item={item} fieldName={"Name"} />
+              )}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyTasksContainer}>
+                  <Text style={styles.emptyTasksText}>No faults found</Text>
+                </View>
+              )}
+            />
+          </View>
+        </View>
+      )}
+    </UserContext.Consumer>
   );
 };
 
@@ -108,67 +184,82 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 20,
   },
-  title: {
+  header: {
+    backgroundColor: "#62B1F6",
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  headerText: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
+    color: "#fff",
+    textAlign: "center",
   },
-  field: {
+  inputContainer: {
+    paddingHorizontal: 10,
     marginBottom: 20,
-  },
-  label: {
-    fontWeight: "bold",
-    marginBottom: 5,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
     padding: 10,
-    fontSize: 16,
-  },
-  summaryInput: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  uploadButton: {
-    backgroundColor: "#4caf50",
+    marginBottom: 10,
     borderRadius: 5,
-    padding: 10,
-    alignItems: "center",
-    marginBottom: 20,
   },
-  uploadButtonText: {
+  fileButton: {
+    backgroundColor: "#62B1F6",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  fileButtonText: {
     color: "#fff",
     fontWeight: "bold",
-  },
-  fileUri: {
-    marginVertical: 10,
-    fontSize: 16,
+    textAlign: "center",
   },
   submitButton: {
-    backgroundColor: "#2196f3",
-    borderRadius: 5,
+    backgroundColor: "#62B1F6",
     padding: 10,
-    alignItems: "center",
-    marginTop: 20,
+    borderRadius: 5,
   },
   submitButtonText: {
     color: "#fff",
     fontWeight: "bold",
+    textAlign: "center",
   },
-  navButton: {
-    backgroundColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    alignItems: "center",
-    marginTop: 20,
+  faultsContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
   },
-  navButtonText: {
-    color: "#000",
+  faultsHeaderText: {
+    fontSize: 18,
     fontWeight: "bold",
+    marginBottom: 10,
+  },
+  taskItem: {
+    backgroundColor: "#eee",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  taskName: {
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  taskDescription: {
+    marginBottom: 5,
+  },
+  emptyTasksContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 100,
+  },
+  emptyTasksText: {
+    color: "#999",
+    fontStyle: "italic",
   },
 });
 

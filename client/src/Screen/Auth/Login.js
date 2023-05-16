@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Alert,
 } from "react-native";
 import InputFieldComponent from "../../../src/Component/InputFieldComponent";
 import ButtonComponent from "../../../src/Component/ButtonComponent";
@@ -25,6 +26,7 @@ export default function Login({ navigation }) {
   const [userID, setUserID] = useState("");
   const [userName, setUserName] = useState("");
   const [groupID, setGroupID] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // new state to hold error message
 
   const handleLogin = () => {
     console.log("in");
@@ -51,6 +53,8 @@ export default function Login({ navigation }) {
         }
       })
       .catch((err) => {
+        setErrorMessage("                The Username/Password is incorrect"); // set error message if login fails
+
         console.error(err);
       });
   };
@@ -154,6 +158,9 @@ export default function Login({ navigation }) {
             />
           </View>
         </View>
+        {errorMessage ? (
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        ) : null}
         <View>
           {/* Your email field Component below */}
           <InputFieldComponent
@@ -189,7 +196,7 @@ export default function Login({ navigation }) {
           {/* Login Button which navigate to next Home screen who have footer too*/}
 
           <ButtonComponent
-            label="SignIn"
+            label="Sign In"
             onPress={() => handleLogin()}
             backgroundColor={Theme.green}
             marginLeft={20}
@@ -198,41 +205,7 @@ export default function Login({ navigation }) {
             marginButton={10}
             labelColor={Theme.white}
           />
-          {/* Signup Button which navigate to next Signup screen */}
-          <ButtonComponent
-            onPress={() => navigation.navigate("SignUp")}
-            label="Or Sign Up with:"
-            backgroundColor={Theme.black}
-            marginLeft={20}
-            marginRight={20}
-            labelColor={Theme.white}
-          />
-        </View>
 
-        {/* Facebook and Google Button Wrapper including Buttons */}
-        <View
-          style={{
-            justifyContent: "center",
-            flexDirection: "row",
-            alignItems: "center",
-            marginVertical: 20,
-          }}
-        >
-          <Entypo
-            name="facebook-with-circle"
-            size={50}
-            color="#1877F2"
-          ></Entypo>
-          <View style={{ marginHorizontal: 20 }}></View>
-          <Ionicons name="logo-google" size={50} color="#1877F2"></Ionicons>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            marginVertical: 10,
-            alignSelf: "center",
-          }}
-        >
           {/* Create an account Button which navigate to next Signup screen */}
           <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
             <Text
