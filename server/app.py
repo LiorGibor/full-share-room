@@ -364,70 +364,46 @@ def remove_notification():
         return jsonify({'status': 'fail', 'message': 'Failed to connect to DB'}), 500
 
 
+def get_data_from_table(table_name, group_id):
+    table_data, success = server_assistent.query_db(
+        f"PRAGMA table_info({table_name})")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        f"SELECT * FROM {table_name} WHERE group_id=?", (group_id,))
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    return rows_as_dicts, success
+
 @app.route('/missions_from_group_id', methods=['POST'])
 def missions_from_group_id():
     data = request.get_json()
     group_id = data['group_id']
-    print("asdsad", group_id)
-    table_data, success = server_assistent.query_db(
-        "PRAGMA table_info(missions)")
-    column_names = [info[1] for info in table_data]
-    rows, success = server_assistent.query_db(
-        'SELECT * FROM missions WHERE group_id=?', (group_id,))
-    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
-
+    rows_as_dicts, success = get_data_from_table('missions', group_id)
     json_data = json.dumps(rows_as_dicts)
-    # return jsonify(json_data), 200
     return json_data, 200
-
 
 @app.route('/outcomes_from_group_id', methods=['POST'])
 def outcomes_from_group_id():
     data = request.get_json()
     group_id = data['group_id']
-
-    table_data, success = server_assistent.query_db(
-        "PRAGMA table_info(outcomes)")
-    column_names = [info[1] for info in table_data]
-    rows, success = server_assistent.query_db(
-        'SELECT * FROM outcomes WHERE group_id=?', (group_id,))
-    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
-
+    rows_as_dicts, success = get_data_from_table('outcomes', group_id)
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
-
 
 @app.route('/notifications_from_group_id', methods=['POST'])
 def notifications_from_group_id():
     data = request.get_json()
     group_id = data['group_id']
-
-    table_data, success = server_assistent.query_db(
-        "PRAGMA table_info(notifications)")
-    column_names = [info[1] for info in table_data]
-    rows, success = server_assistent.query_db(
-        'SELECT * FROM notifications WHERE group_id=?', (group_id,))
-    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
-
+    rows_as_dicts, success = get_data_from_table('notifications', group_id)
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
-
 
 @app.route('/faults_from_group_id', methods=['POST'])
 def faults_from_group_id():
     data = request.get_json()
     group_id = data['group_id']
-
-    table_data, success = server_assistent.query_db(
-        "PRAGMA table_info(faults)")
-    column_names = [info[1] for info in table_data]
-    rows, success = server_assistent.query_db(
-        'SELECT * FROM faults WHERE group_id=?', (group_id,))
-    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
-
+    rows_as_dicts, success = get_data_from_table('faults', group_id)
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
-
 
 @app.route('/user_name_from_id', methods=['POST'])
 def user_name_from_id():
