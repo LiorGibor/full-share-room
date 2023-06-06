@@ -96,7 +96,7 @@ export default function ProfileScreen({ navigation }) {
               { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
             ]}
             onPress={() => {
-              groupID !== "undefined" ? handleNavigate("ManageTasks") : null;
+              groupID !== "undefined" ? handleNavigate("ApplyRequest") : null;
             }}
           >
             <Text style={styles.textBox}>
@@ -119,7 +119,7 @@ export default function ProfileScreen({ navigation }) {
               { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
             ]}
             onPress={() => {
-              groupID !== "undefined" ? handleNavigate("ManageTasks") : null;
+              groupID !== "undefined" ? handleNavigate("SplitPayments") : null;
             }}
           >
             <Text numberOfLines={2} style={styles.textBox}>
@@ -133,7 +133,9 @@ export default function ProfileScreen({ navigation }) {
               { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
             ]}
             onPress={() => {
-              groupID !== "undefined" ? handleNavigate("ManageTasks") : null;
+              groupID !== "undefined"
+                ? handleNavigate("UploadDocumentPage")
+                : null;
             }}
           >
             <Text style={styles.textBox}>Upload Documents</Text>
@@ -152,7 +154,7 @@ export default function ProfileScreen({ navigation }) {
           <TouchableOpacity
             style={[styles.box, { backgroundColor: "#B4C7E7" }]}
             onPress={() => {
-              handleNavigate("ManageTasks");
+              handleNavigate("GroupPage");
             }}
           >
             <Text style={styles.textBox}>Join Group</Text>

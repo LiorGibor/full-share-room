@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { showMessage, hideMessage } from "react-native-flash-message";
+import FlashMessage from "react-native-flash-message";
 
 const GroupPage = ({ navigation }) => {
   // const [userID, setUserID] = useState(0);
@@ -50,14 +52,22 @@ const GroupPage = ({ navigation }) => {
         data
       );
       if (response.status === 200) {
-        Alert.alert("Success", "Group created successfully");
+        showMessage({
+          message: "Success",
+          description: "Group created successfully",
+          type: "success",
+        });
         console.log("Asd", response.data);
         setGroupID(response.data.group_id);
         AsyncStorage.setItem("groupID", response.data.group_id);
       }
     } catch (error) {
       console.log(error);
-      Alert.alert("Error", "Unable to create  group");
+      showMessage({
+        message: "Error",
+        description: "Unable to create group",
+        type: "danger",
+      });
     }
   };
   const handleGetGroupIdDetails = () => {
@@ -74,12 +84,20 @@ const GroupPage = ({ navigation }) => {
         data
       );
       if (response.status === 200) {
-        Alert.alert("Success", "User added successfully");
+        showMessage({
+          message: "Success",
+          description: "User added successfully",
+          type: "success",
+        });
         AsyncStorage.setItem("groupID", groupID);
       }
     } catch (error) {
       console.log(error);
-      Alert.alert("Error", "Unable to join existing group");
+      showMessage({
+        message: "Error",
+        description: "Unable to join existing group",
+        type: "danger",
+      });
     }
   };
 
@@ -153,6 +171,7 @@ const GroupPage = ({ navigation }) => {
       >
         <Text style={styles.bottomButtonText}>Home</Text>
       </TouchableOpacity>
+      <FlashMessage position="top" />
     </View>
   );
 };

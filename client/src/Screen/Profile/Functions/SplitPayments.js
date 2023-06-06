@@ -84,10 +84,43 @@ const SplitPayments = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-      setExpenses(response.data);
+      replaceUserIDWithName(response.data);
+      // setExpenses(response.data);
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const replaceUserIDWithName = async (expenses) => {
+    const updatedExpenses = [];
+
+    for (let i = 0; i < expenses.length; i++) {
+      const expense = expenses[i];
+      const { user_id } = expense;
+      const data = JSON.stringify({
+        user_id: user_id,
+      });
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/user_name_from_id",
+          data,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        const userName = response.data.user_name;
+
+        updatedExpenses.push({
+          ...expense,
+          user_id: userName,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    setExpenses(updatedExpenses);
   };
 
   const addNotification = async () => {
@@ -125,6 +158,24 @@ const SplitPayments = () => {
   }, []);
 
   useEffect(() => {
+    const fetchExpenses = async () => {
+      const data = JSON.stringify({
+        group_id: groupID,
+      });
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/outcomes_from_group_id",
+          data,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        replaceUserIDWithName(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     fetchExpenses();
   }, [groupID]);
 
