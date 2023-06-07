@@ -575,11 +575,10 @@ def members_from_group_id():
     data = request.get_json()
     group_id = data["group_id"]
     print("asdsad", group_id)
-    table_data, success = server_assistent.query_db("PRAGMA table_info(group_members)")
+    table_data, success = server_assistent.query_db("PRAGMA table_info(users)")
     column_names = [info[1] for info in table_data]
     rows, success = server_assistent.query_db(
-        "SELECT * FROM group_members WHERE group_id=?", (group_id,)
-    )
+        "SELECT * FROM users LEFT JOIN group_members ON users.id = group_members.user_id AND group_members.group_id=?", (group_id,)    )
     rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
 
     json_data = json.dumps(rows_as_dicts)
