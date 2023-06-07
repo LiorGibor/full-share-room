@@ -570,6 +570,21 @@ def validate_new_user(username, password, email, full_name, date_of_birth):
         return jsonify({"status": "Date of birth must be at least 5 characters"}), 400
     return True
 
+@app.route("/members_from_group_id", methods=["POST"])
+def members_from_group_id():
+    data = request.get_json()
+    group_id = data["group_id"]
+    print("asdsad", group_id)
+    table_data, success = server_assistent.query_db("PRAGMA table_info(group_members)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        "SELECT * FROM group_members WHERE group_id=?", (group_id,)
+    )
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+
+    json_data = json.dumps(rows_as_dicts)
+    # return jsonify(json_data), 200
+    return json_data, 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
