@@ -570,6 +570,7 @@ def validate_new_user(username, password, email, full_name, date_of_birth):
         return jsonify({"status": "Date of birth must be at least 5 characters"}), 400
     return True
 
+
 @app.route("/members_from_group_id", methods=["POST"])
 def members_from_group_id():
     data = request.get_json()
@@ -584,6 +585,25 @@ def members_from_group_id():
     json_data = json.dumps(rows_as_dicts)
     # return jsonify(json_data), 200
     return json_data, 200
+
+
+@app.route("/remove_user_from_group_by_id", methods=["POST"])
+def remove_user_from_group():
+    data = request.get_json()
+
+    id = data["id"]
+
+    deleted_row, success = server_assistent.query_db(
+        "DELETE FROM group_members WHERE user_id = ?", (id,), True
+    )
+    if success:
+        if deleted_row:
+            return jsonify({"status": "success"}), 200
+        else:
+            return jsonify({"status": "fail", "message": "no row deleted"}), 500
+    else:
+        return jsonify({"status": "fail", "message": "Failed to connect to DB"}), 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
