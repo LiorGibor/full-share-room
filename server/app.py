@@ -571,5 +571,75 @@ def validate_new_user(username, password, email, full_name, date_of_birth):
     return True
 
 
+@app.route("/members_from_group_id", methods=["POST"])
+def members_from_group_id():
+    data = request.get_json()
+    group_id = data["group_id"]
+    print("asdsad", group_id)
+    table_data, success = server_assistent.query_db("PRAGMA table_info(users)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        "SELECT DISTINCT users.* FROM users JOIN group_members ON users.id = group_members.user_id AND group_members.group_id=?", (group_id,))
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    rows_as_dicts = [{key: value.decode("utf-8") if isinstance(value, bytes) else value} for row in rows_as_dicts for key, value in row.items()]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
+
+
+@app.route("/remove_user_from_group_by_id", methods=["POST"])
+def remove_user_from_group():
+    data = request.get_json()
+
+    id = data["id"]
+
+    deleted_row, success = server_assistent.query_db(
+        "DELETE FROM group_members WHERE user_id = ?", (id,), True
+    )
+    if success:
+        if deleted_row:
+            return jsonify({"status": "success"}), 200
+        else:
+            return jsonify({"status": "fail", "message": "no row deleted"}), 500
+    else:
+        return jsonify({"status": "fail", "message": "Failed to connect to DB"}), 500
+
+
+@app.route("/get_user_details_by_id", methods=["POST"])
+def get_user_details_by_id():
+    data = request.get_json()
+    user_id = data["id"]
+    print("asdsad", user_id)
+    table_data, success = server_assistent.query_db("PRAGMA table_info(users)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        "SELECT * FROM users WHERE users.id=?", (user_id,)
+    )
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    rows_as_dicts = [{key: value.decode("utf-8") if isinstance(value, bytes) else value} for row in rows_as_dicts for key, value in row.items()]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
+
+
+@app.route("/add_user_to_group", methods=["POST"])
+def add_user_to_group():
+    #need to check if group exists and user isn't in other group
+    data = request.get_json()
+    user_id = data["user_id"]
+    group_id = data["group_id"]
+    print(user_id, group_id)
+    created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    _, success = server_assistent.query_db(
+        "INSERT INTO group_members (group_id, user_id, user_join_to_group) "
+        "VALUES (?,?,?)",
+        (group_id, user_id, created_date),
+    )
+    if success:
+        return jsonify({"status": "success", "group_id": group_id}), 200
+    else:
+        return jsonify({"status": "fail"}), 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
