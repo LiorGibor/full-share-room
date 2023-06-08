@@ -579,11 +579,11 @@ def members_from_group_id():
     table_data, success = server_assistent.query_db("PRAGMA table_info(users)")
     column_names = [info[1] for info in table_data]
     rows, success = server_assistent.query_db(
-        "SELECT * FROM users LEFT JOIN group_members ON users.id = group_members.user_id AND group_members.group_id=?", (group_id,)    )
+        "SELECT DISTINCT users.* FROM users JOIN group_members ON users.id = group_members.user_id AND group_members.group_id=?", (group_id,))
     rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    rows_as_dicts = [{key: value.decode("utf-8") if isinstance(value, bytes) else value} for row in rows_as_dicts for key, value in row.items()]
 
     json_data = json.dumps(rows_as_dicts)
-    # return jsonify(json_data), 200
     return json_data, 200
 
 
@@ -603,6 +603,23 @@ def remove_user_from_group():
             return jsonify({"status": "fail", "message": "no row deleted"}), 500
     else:
         return jsonify({"status": "fail", "message": "Failed to connect to DB"}), 500
+
+
+@app.route("/get_user_details_by_id", methods=["POST"])
+def get_user_details_by_id():
+    data = request.get_json()
+    user_id = data["id"]
+    print("asdsad", user_id)
+    table_data, success = server_assistent.query_db("PRAGMA table_info(users)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        "SELECT * FROM users WHERE users.id=?", (user_id,)
+    )
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    rows_as_dicts = [{key: value.decode("utf-8") if isinstance(value, bytes) else value} for row in rows_as_dicts for key, value in row.items()]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
 
 
 if __name__ == "__main__":
