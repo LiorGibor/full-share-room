@@ -622,5 +622,24 @@ def get_user_details_by_id():
     return json_data, 200
 
 
+@app.route("/add_user_to_group", methods=["POST"])
+def add_user_to_group():
+    #need to check if group exists and user isn't in other group
+    data = request.get_json()
+    user_id = data["user_id"]
+    group_id = data["group_id"]
+    print(user_id, group_id)
+    created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    _, success = server_assistent.query_db(
+        "INSERT INTO group_members (group_id, user_id, user_join_to_group) "
+        "VALUES (?,?,?)",
+        (group_id, user_id, created_date),
+    )
+    if success:
+        return jsonify({"status": "success", "group_id": group_id}), 200
+    else:
+        return jsonify({"status": "fail"}), 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
