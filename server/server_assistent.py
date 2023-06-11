@@ -15,7 +15,7 @@ def init_db():
     create_bills_table()
     create_outcomes_table()
     create_notifications_table()
-
+    create_events_table()
 
 def create_users_table():
     conn = sqlite3.connect(DATABASE)
@@ -153,6 +153,24 @@ def create_outcomes_table():
     conn.commit()
     conn.close()
 
+
+def create_events_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS events (
+                        event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_creator_id INTEGER NOT NULL,
+                        event_name TEXT NOT NULL,
+                        event_description TEXT NOT NULL,
+                        event_date TIMESTAMP NOT NULL,                        
+                        created_date TIMESTAMP NOT NULL,
+                        
+                        FOREIGN KEY (user_creator_id) REFERENCES users (user_creator_id)
+                    )''')
+
+    conn.commit()
+    conn.close()
 
 def create_notifications_table():
     conn = sqlite3.connect(DATABASE)
