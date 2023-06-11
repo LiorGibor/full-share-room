@@ -641,5 +641,70 @@ def add_user_to_group():
         return jsonify({"status": "fail"}), 500
 
 
+@app.route("/add_event", methods=["POST"])
+def add_event():
+    data = request.get_json()
+    user_creator_id = data["user_id"]
+    event_name = data["event_name"]
+    event_description = data["event_description"]
+    event_date_string = data["event_date"]
+    date_format = "%Y-%m-%d %H:%M:%S"
+    event_date = datetime.datetime.strptime(event_date_string, date_format)
+    created_date = datetime.datetime.now().strftime(date_format)
+    event_id, success = server_assistent.query_db(
+        "INSERT INTO events (user_creator_id, event_name, event_description, event_date, "
+        "created_date) VALUES (?,?,?,?,?)",
+        (user_creator_id, event_name, event_description, event_date, created_date),
+        True,
+    )
+    if success:
+        if event_id:
+            return (
+                jsonify({"status": "success", "event_id": event_id}),
+                200,
+            )
+        else:
+            return (
+                jsonify({"status": "fail", "message": "Failed to insert this event"}),
+                500,
+            )
+    else:
+        return jsonify({"status": "fail", "message": "Failed to add to DB"}), 500
+
+
+@app.route("/get_events", methods=["POST"])
+def get_events():
+    data = request.get_json()
+
+    table_data, success = server_assistent.query_db("PRAGMA table_info(events)")
+    column_names = [info[1] for info in table_data]
+    curr_date = datetime.datetime.now()
+    rows, success = server_assistent.query_db(
+        "SELECT * FROM events WHERE event_date<=?", (curr_date,)
+    )
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
+
+
+@app.route("/remove_event", methods=["POST"])
+def remove_event():
+    data = request.get_json()
+
+    event_id = data["mission_id"]
+
+    deleted_row, success = server_assistent.query_db(
+        "DELETE FROM events WHERE event_id = ?", (event_id,), True
+    )
+    if success:
+        if deleted_row:
+            return jsonify({"status": "success"}), 200
+        else:
+            return jsonify({"status": "fail", "message": "no row deleted"}), 500
+    else:
+        return jsonify({"status": "fail", "message": "Failed to connect to DB"}), 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
