@@ -62,6 +62,7 @@ def create_group_members_table():
                     group_member_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
+                    is_landlord INTEGER NOT NULL,
                     user_join_to_group INTEGER NOT NULL,
                     date_intended_contract_termination INTEGER,
                     FOREIGN KEY (group_id) REFERENCES groups (group_id),
