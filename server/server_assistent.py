@@ -46,6 +46,7 @@ def create_groups_table():
     cur.execute('''CREATE TABLE IF NOT EXISTS `groups` (
                         group_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         group_name TEXT NOT NULL,
+                        group_max_members INTEGER NOT NULL,
                         group_details TEXT
                     )''')
 
@@ -62,7 +63,7 @@ def create_group_members_table():
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
                     user_join_to_group INTEGER NOT NULL,
-
+                    date_intended_contract_termination INTEGER,
                     FOREIGN KEY (group_id) REFERENCES groups (group_id),
                     FOREIGN KEY (user_id) REFERENCES users (id),
 
