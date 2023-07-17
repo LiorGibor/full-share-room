@@ -137,6 +137,7 @@ def add_group():
     data = request.get_json()
 
     user_name = data["email"]
+    is_landlord = data[is_landlord]
     group_name = data["group_name"]
     group_max_members = data["group_max_members"]
     group_description = data["group_description"]
@@ -160,9 +161,9 @@ def add_group():
         return jsonify({"status": "fail", "message": "Failed to create group"}), 500
     created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     _, success = server_assistent.query_db(
-        "INSERT INTO group_members (group_id, user_id, user_join_to_group) "
-        "VALUES (?,?,?)",
-        (group_id, user_id, created_date),
+        "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group) "
+        "VALUES (?,?,?,?)",
+        (group_id, user_id, is_landlord, created_date),
     )
     if success:
         return jsonify({"status": "success", "group_id": group_id}), 200
@@ -588,6 +589,20 @@ def members_from_group_id():
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
 
+@app.route("/get_user_groups", methods=["POST"])
+def get_user_groups():
+    data = request.get_json()
+    user_id = data["user_id"]
+    print("asdsad", user_id)
+    table_data, success = server_assistent.query_db("PRAGMA table_info(groups)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        "SELECT DISTINCT groups.* FROM groups JOIN group_members ON groups.group_id = group_members.group_id AND group_members.user_id=?", (user_id,))
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    rows_as_dicts = [{key: value.decode("utf-8") if isinstance(value, bytes) else value} for row in rows_as_dicts for key, value in row.items()]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
 
 @app.route("/remove_user_from_group_by_id", methods=["POST"])
 def remove_user_from_group():
@@ -672,13 +687,14 @@ def add_user_to_group():
     user_id = data["user_id"]
     group_id = data["group_id"]
     date_intended_contract_termination = data["date_intended_contract_termination"]
+    is_landlord = data[is_landlord]
     print(user_id, group_id)
 
     created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     _, success = server_assistent.query_db(
-        "INSERT INTO group_members (group_id, user_id, user_join_to_group, date_intended_contract_termination) "
-        "VALUES (?,?,?,?)",
-        (group_id, user_id, created_date, date_intended_contract_termination),
+        "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group, date_intended_contract_termination) "
+        "VALUES (?,?,?,?,?)",
+        (group_id, user_id, is_landlord, created_date, date_intended_contract_termination),
     )
     if success:
         return jsonify({"status": "success", "group_id": group_id}), 200
