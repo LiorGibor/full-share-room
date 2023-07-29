@@ -6,27 +6,24 @@ import {
   TouchableOpacity,
   View,
   Image,
-  Alert,
+  Button,
+  TextInput,
 } from "react-native";
-import InputFieldComponent from "../../../src/Component/InputFieldComponent";
-import ButtonComponent from "../../../src/Component/ButtonComponent";
 import PasswordComponent from "../../../src/Component/PasswordComponent";
-import Entypo from "@expo/vector-icons/Entypo";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { user_login } from "../../api/user_api";
 import { UserContext } from "../../api/UserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-import Theme from "../../Constants/Theme";
 export default function Login({ navigation }) {
-  const [email, setEmail] = useState(""); // In this state whatever email you write will be stored you can use it for sending to server
-  const [password, setPassword] = useState(""); // In this state whatever password you write will be stored you can use it for sending to server
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [checkValidEmail, setCheckValidEmail] = useState(false);
   const [userID, setUserID] = useState("");
   const [userName, setUserName] = useState("");
   const [groupID, setGroupID] = useState("");
-  const [errorMessage, setErrorMessage] = useState(""); // new state to hold error message
+  const [errorMessage, setErrorMessage] = useState("");
+  const [role, setRole] = useState("");
 
   const handleLogin = () => {
     console.log("in");
@@ -112,14 +109,16 @@ export default function Login({ navigation }) {
     try {
       console.log(data);
       const response = await axios.post(
-        "http://localhost:5000/user_name_from_id",
+        "http://localhost:5000/get_user_details_by_id",
         data,
         {
           headers: { "Content-Type": "application/json" },
         }
       );
       console.log("ASdasdasd", response.data);
-      setUserName(response.data.user_name);
+      setUserName(response.data[1].username);
+      setRole(response.data[10].role);
+      
     } catch (error) {
       console.log(error);
       // Alert.alert("Error", "Unable to get group details");
@@ -136,13 +135,20 @@ export default function Login({ navigation }) {
     }
   }, [userID]);
 
+
   useEffect(() => {
     if (groupID !== "") {
       AsyncStorage.setItem("groupID", groupID);
       console.log("username is ", userName);
 
       AsyncStorage.setItem("userName", userName);
-      navigation.navigate("FoodBottomTabs");
+      AsyncStorage.setItem("role", role);
+
+      if (role === "user") {
+        navigation.navigate("UserPage");
+      } else if (role === "owner") {
+        navigation.navigate("OwnerPage");
+      }
     }
   }, [groupID]);
 
@@ -162,20 +168,18 @@ export default function Login({ navigation }) {
           <Text style={styles.errorMessage}>{errorMessage}</Text>
         ) : null}
         <View>
-          {/* Your email field Component below */}
-          <InputFieldComponent
-            placeholder={"Enter your email"}
-            icon="email"
-            label="Email"
+          <TextInput 
             value={email}
             onChangeText={(text) => setEmail(text)}
+            placeholder="Enter your email"
+            keyboardType="email-address" 
+            style={styles.inputField}
           />
           {checkValidEmail ? (
             <Text style={styles.textFailed}>Wrong format email</Text>
           ) : (
             <Text style={styles.textFailed}> </Text>
           )}
-          {/* Your Password field Component below */}
           <PasswordComponent
             placeholder={"Enter your password"}
             icon="key"
@@ -184,34 +188,17 @@ export default function Login({ navigation }) {
             onChangeText={(text) => setPassword(text)}
           />
         </View>
-        {/* Forgot password button  */}
         <View style={{ marginHorizontal: 20 }}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("ForgetPassword")}
-            style={{ alignSelf: "flex-end" }}
-          >
-            <Text style={styles.forgetPassword}>Forget Password?</Text>
-          </TouchableOpacity>
-
-          {/* Login Button which navigate to next Home screen who have footer too*/}
-
-          <ButtonComponent
-            label="Sign In"
-            onPress={() => handleLogin()}
-            backgroundColor={Theme.green}
-            marginLeft={20}
-            marginRight={20}
-            marginTop={10}
-            marginButton={10}
-            labelColor={Theme.white}
+          <Button
+            title="Sign In"
+            onPress={handleLogin}
+            color="#4CAF50" // hardcoded color for green
           />
-
-          {/* Create an account Button which navigate to next Signup screen */}
           <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
             <Text
               style={{
                 marginLeft: 5,
-                color: Theme.primary,
+                color: "#FF5733", // hardcoded color for primary
                 fontWeight: "bold",
                 fontSize: 16,
                 textDecorationLine: "underline",
@@ -225,6 +212,7 @@ export default function Login({ navigation }) {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -286,5 +274,13 @@ const styles = StyleSheet.create({
   textFailed: {
     alignSelf: "flex-end",
     color: "red",
+  },
+  inputField: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingLeft: 10,
+    marginVertical: 5,
+    borderRadius: 5,
   },
 });

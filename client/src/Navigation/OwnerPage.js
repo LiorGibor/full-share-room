@@ -1,33 +1,32 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import HomeScreen from "../../src/Screen/Home/HomeScreen";
+import HomeScreen from "../Screen/Appartements/Appartements";
 import ChatList from "../Screen/Chat/ChatList";
-import StepIndicatorScreen from "../Screen/Checkout/NotificationScreen";
-import ProfileScreen from "../../src/Screen/Profile/ProfileScreen";
-import Theme from "../../src/Constants/Theme";
+import StepIndicatorScreen from "../Screen/Notification/NotificationScreen";
+import OwnerScreen from "../Screen/Profile/OwnerScreen";
+import GroupDetailsPage from "../Screen/Appartements/MyAppartements";
+// import Theme from "../../src/Constants/Theme";
 
 const Tab = createBottomTabNavigator();
 // Below are the screens whcih use in bottom tab those are import in this screen
-function FoodBottomTabs({ route }) {
+function OwnerPage({ route }) {
   return (
     <Tab.Navigator
       //First screen will be home all the time
       initialRouteName="Home"
       screenOptions={{
-        tabBarActiveTintColor: Theme.primary,
+        tabBarActiveTintColor: "#7B7BC4",
         headerShown: false,
-        tabBarInactiveTintColor: Theme.grey,
+        tabBarInactiveTintColor: "#7B7BC4",
       }}
     >
       <Tab.Screen
         name="Home"
-        component={ProfileScreen}
+        component={OwnerScreen}
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ color, size }) => (
@@ -60,9 +59,9 @@ function FoodBottomTabs({ route }) {
       />
       <Tab.Screen
         name="Profile"
-        component={HomeScreen}
+        component={GroupDetailsPage}
         options={{
-          tabBarLabel: "Appartements",
+          tabBarLabel: "GroupDetailsPage",
           tabBarIcon: ({ color, size }) => (
             //This is the icon use for Profile in bottom tab
             <FontAwesome5 name="home" color={color} size={size} />
@@ -72,4 +71,4 @@ function FoodBottomTabs({ route }) {
     </Tab.Navigator>
   );
 }
-export default FoodBottomTabs;
+export default OwnerPage;

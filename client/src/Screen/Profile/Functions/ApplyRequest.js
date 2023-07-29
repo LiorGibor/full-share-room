@@ -123,7 +123,9 @@ const ApplyRequest = () => {
       {(value) => (
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.headerText}>Open Call</Text>
+            <Text style={styles.headerText}>
+              Open Call To Appartement Owner
+            </Text>
           </View>{" "}
           <View style={styles.inputContainer}>
             <TextInput
@@ -141,10 +143,6 @@ const ApplyRequest = () => {
               numberOfLines={4}
             />
 
-            <TouchableOpacity style={styles.fileButton} onPress={pickDocument}>
-              <Text style={styles.fileButtonText}>Attach file</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.submitButton}
               onPress={handleSubmit}
@@ -154,13 +152,13 @@ const ApplyRequest = () => {
             <br></br>
             <TouchableOpacity
               style={styles.submitButton}
-              onPress={() => navigation.navigate("FoodBottomTabs")}
+              onPress={() => navigation.navigate("UserPage")}
             >
               <Text style={styles.submitButtonText}>Home</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.faultsContainer}>
-            <Text style={styles.faultsHeaderText}>Faults:</Text>
+            <Text style={styles.faultsHeaderText}>Applications:</Text>
             <FlatList
               data={faults}
               keyExtractor={(item) => item.fault_id.toString()}
@@ -169,7 +167,9 @@ const ApplyRequest = () => {
               )}
               ListEmptyComponent={() => (
                 <View style={styles.emptyTasksContainer}>
-                  <Text style={styles.emptyTasksText}>No faults found</Text>
+                  <Text style={styles.emptyTasksText}>
+                    No Applications found
+                  </Text>
                 </View>
               )}
             />

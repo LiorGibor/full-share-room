@@ -6,10 +6,61 @@ import bcrypt
 from flask import Flask, request, jsonify, g
 import server_assistent
 from flask_cors import CORS
+from flask import Flask, render_template, request, jsonify
+from flask_socketio import SocketIO, join_room, leave_room, send, emit
+
+
 
 app = Flask(__name__)
 cors = CORS(app)
 server_assistent.init_db()
+
+
+
+
+
+
+
+@app.route("/get_group_details_by_id", methods=["POST"])
+def get_group_details_by_id():
+    data = request.get_json()
+    user_id = data["user_id"]
+
+    # Fetching group_ids associated with the user
+    rows, success = server_assistent.query_db(
+        f"SELECT group_id FROM group_members WHERE user_id={user_id}"
+    )
+
+    if not success:
+        return jsonify({"error": "Failed to fetch group_ids for the user."}), 500
+
+    column_names = ["group_id"]
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+
+    group_details = []
+    for row in rows_as_dicts:
+        group_id = row["group_id"]
+
+        # Fetching details of the group based on group_id
+        group_row, group_success = server_assistent.query_db(
+            f"SELECT * FROM groups WHERE group_id='{group_id}'"
+        )
+
+        if group_success and group_row:
+            group_column_names = [
+                "group_id", "group_name", "group_max_members", "group_details", "end_of_contract"  # Add other columns as needed
+            ]
+            group_details.append(
+                dict(zip(group_column_names, group_row[0]))
+            )
+        else:
+            # Handle the case when the group_id is not found in the groups table
+            group_details.append({"group_id": group_id, "error": "Group not found."})
+
+    return jsonify(group_details)
+
+
+
 
 
 @app.route("/register", methods=["POST"])
@@ -50,13 +101,13 @@ def add_user():
     password = data["password"]
     email = data["email"]
     full_name = data["full_name"]
+    role = data["role"]
     # profile_picture = data['profile_picture']
     date_of_birth = data["date_of_birth"]
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
     created_at = datetime.datetime.now()
     updated_at = datetime.datetime.now()
     last_login = datetime.datetime.now()
-    role = "user"
     # profile_picture = 'C:\\Users\\lmaim\\Desktop\\bsc\\4th_year\\Final_progect\\alternative_final_project\\client\\assets\\profilePic.png'
     if (
         validate_new_user(username, password, email, full_name, date_of_birth)
@@ -134,95 +185,66 @@ def delete_call():
 
 @app.route("/add_group", methods=["POST"])
 def add_group():
+
+
     data = request.get_json()
 
-    user_name = data["email"]
+    user_id = data["userID"]
+    is_landlord = data["is_landlord"]
     group_name = data["group_name"]
+    group_max_members = data["group_max_members"]
     group_description = data["group_description"]
-    print(user_name, group_name, group_description)
-    user_id_result, success = server_assistent.query_db(
-        "SELECT id FROM users WHERE email=?", (user_name,), True
-    )
-    if not success or user_id_result is None:
-        return jsonify({"status": "fail", "message": "User not found"}), 404
+    end_of_contract = data["end_of_contract"]
 
-    user_id = user_id_result[0]
     group_id, success = server_assistent.query_db(
-        "INSERT INTO groups (group_name, group_details) VALUES (?, ?)",
+        "INSERT INTO groups (group_name,group_max_members, group_details,end_of_contract) VALUES (?, ?, ? ,?)",
         (
             group_name,
+            group_max_members,
             group_description,
+            end_of_contract,
         ),
     )
     if not success:
         return jsonify({"status": "fail", "message": "Failed to create group"}), 500
     created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     _, success = server_assistent.query_db(
-        "INSERT INTO group_members (group_id, user_id, user_join_to_group) "
-        "VALUES (?,?,?)",
-        (group_id, user_id, created_date),
+        "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group,is_finish) "
+        "VALUES (?,?,?,?,?)",
+        (group_id, user_id, is_landlord, created_date,False),
     )
     if success:
         return jsonify({"status": "success", "group_id": group_id}), 200
     else:
         return jsonify({"status": "fail"}), 500
 
-
-@app.route("/enter_to_group", methods=["POST"])
-def enter_to_group():
+@app.route("/toggle_finish", methods=["POST"])
+def toggle_finish():
     data = request.get_json()
+    user_id = data["user_id"]
 
-    user_email = data["email"]
-    group_id = data["group_id"]
-
-    # Get user_id from the database using the provided email
-    user_id, success = server_assistent.query_db(
-        "SELECT id FROM users WHERE email=?", (user_email,), True
+    # Check if the user exists in the group_members table
+    user_in_group, success = server_assistent.query_db(
+        "SELECT * FROM group_members WHERE user_id=?", (user_id,), one=True
     )
-    user_id = user_id[0]
+    print("user_in_group" ,user_in_group)
+    if not success or not user_in_group:
+        return jsonify({"status": "fail", "message": "User not found in group_members"}), 404
 
-    if not success:
-        return jsonify({"status": "error", "message": "Error fetching user_id"}), 500
+    # Get the current value of 'is_finish' (assume it's the fourth column)
+    is_finish = not user_in_group[6]
 
-    # Check if the user is already a member of the group
-    group_member_id, success = server_assistent.query_db(
-        "SELECT group_member_id FROM group_members WHERE group_id=? and user_id=?",
-        (
-            group_id,
-            user_id,
-        ),
-        True,
-    )
-
-    if not success:
-        return (
-            jsonify({"status": "error", "message": "Error fetching group membership"}),
-            500,
-        )
-
-    if group_member_id:
-        return (
-            jsonify(
-                {"status": "error", "message": "User is already a member of the group"}
-            ),
-            400,
-        )
-
-    # Add user to the group
-    created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    group_member_id, success = server_assistent.query_db(
-        "INSERT INTO group_members (group_id, user_id, user_join_to_group) VALUES (?,?,?)",
-        (group_id, user_id, created_date),
-        True,
+    # Update the 'is_finish' field for the specific user_id
+    result, success = server_assistent.query_db(
+        "UPDATE group_members SET is_finish=? WHERE user_id=?",
+        (is_finish, user_id),
     )
 
     if success:
-        return jsonify({"status": "success"}), 200
+        return jsonify({"status": "success", "is_finish": is_finish}), 200
     else:
-        return (
-            jsonify({"status": "error", "message": "Error adding user to the group"}),
-            500,
-        )
+        return jsonify({"status": "fail", "message": "Failed to update is_finish"}), 500
+
 
 
 @app.route("/id_from_email", methods=["POST"])
@@ -586,6 +608,20 @@ def members_from_group_id():
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
 
+@app.route("/get_user_groups", methods=["POST"])
+def get_user_groups():
+    data = request.get_json()
+    user_id = data["user_id"]
+    print("asdsad", user_id)
+    table_data, success = server_assistent.query_db("PRAGMA table_info(groups)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        "SELECT DISTINCT groups.* FROM groups JOIN group_members ON groups.group_id = group_members.group_id AND group_members.user_id=?", (user_id,))
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    rows_as_dicts = [{key: value.decode("utf-8") if isinstance(value, bytes) else value} for row in rows_as_dicts for key, value in row.items()]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
 
 @app.route("/remove_user_from_group_by_id", methods=["POST"])
 def remove_user_from_group():
@@ -608,12 +644,12 @@ def remove_user_from_group():
 @app.route("/get_user_details_by_id", methods=["POST"])
 def get_user_details_by_id():
     data = request.get_json()
-    user_id = data["id"]
+    user_id = data["user_id"]
     print("asdsad", user_id)
     table_data, success = server_assistent.query_db("PRAGMA table_info(users)")
     column_names = [info[1] for info in table_data]
     rows, success = server_assistent.query_db(
-        "SELECT * FROM users WHERE users.id=?", (user_id,)
+        "SELECT * FROM users WHERE id=?", (user_id,)
     )
     rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
     rows_as_dicts = [{key: value.decode("utf-8") if isinstance(value, bytes) else value} for row in rows_as_dicts for key, value in row.items()]
@@ -621,24 +657,182 @@ def get_user_details_by_id():
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
 
+def is_available_group(group_id):
+    delete_users_finished_contract()
+    curr_members = get_curr_num_group_members(group_id)
+    max_members = get_max_members(group_id)
+    return curr_members is not None and max_members is not None and curr_members < max_members
+
+# def delete_users_finished_contract():
+#     curr_date = datetime.datetime.now()
+#     rows, success = server_assistent.query_db(
+#         "DELETE FROM group_members WHERE date_intended_contract_termination < ?", (curr_date,)
+#     )
+
+# def get_max_members(group_id):
+#     group_id = group_id[0]
+#     group_id = int(group_id)
+#     res, success = server_assistent.query_db(
+#         "SELECT group_max_members FROM groups WHERE group_id = ?", (group_id,))
+#     return res[0][0] if res else None
+
+# def get_curr_num_group_members(group_id):
+#     group_id = group_id[0]
+#     group_id = int(group_id)  # Convert group_id to an integer if needed
+#     res, success = server_assistent.query_db(
+#         "SELECT COUNT(DISTINCT user_id) FROM group_members WHERE group_id = ?", (group_id,))
+#     return res[0][0] if res else None
+
+# @app.route("/get_available_groups", methods=["POST"])
+# def get_available_groups():
+#     all_groups_id, success = server_assistent.query_db(
+#         "SELECT group_id FROM groups")
+#     rows = []  # Initialize rows as an empty list
+#     for group in all_groups_id:
+#         if is_available_group(group):
+#             group_data = server_assistent.query_db(
+#                 "SELECT * FROM groups WHERE group_id = ?", (group[0],))
+#             rows += group_data[0]  # Append the fetched group data to rows
+
+#     table_data, success = server_assistent.query_db("PRAGMA table_info(groups)")
+#     column_names = [info[1] for info in table_data]
+#     rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+#     json_data = json.dumps(rows_as_dicts)
+#     return json_data, 200
+
+@app.route("/get_available_groups", methods=["POST"])
+def get_finished_groups_details():
+    # Find all the members whose 'is_finish' field value is 1
+    finished_members, success = server_assistent.query_db(
+        "SELECT group_id, user_id FROM group_members WHERE is_finish=1"
+    )
+
+    if not success or not finished_members:
+        return jsonify({"status": "fail", "message": "No finished members found"}), 404
+
+    group_details = []
+    for member in finished_members:
+        group_id, user_id = member
+
+        # Fetch group details for each group_id from the 'groups' table
+        group_detail, success = server_assistent.query_db(
+            "SELECT * FROM groups WHERE group_id=?", (group_id,), one=True
+        )
+
+        if success and group_detail:
+            # Fetch the username of the user_id from the 'users' table
+            username, _ = server_assistent.query_db(
+                "SELECT username FROM users WHERE id=?", (user_id,), one=True
+            )
+
+            # Append the relevant details to the list
+            group_details.append({
+                "group_id": group_id,
+                "group_name": group_detail[1],
+                "group_max_members": group_detail[2],
+                "group_description": group_detail[3],
+                "end_of_contract": group_detail[4],
+                "user_id": user_id,
+                "username": username,
+            })
+
+    if group_details:
+        return jsonify({"status": "success", "group_details": group_details}), 200
+    else:
+        return (
+            jsonify({"status": "fail", "message": "No group details found for finished members"}),
+            404,
+        )
+
+
 
 @app.route("/add_user_to_group", methods=["POST"])
 def add_user_to_group():
-    #need to check if group exists and user isn't in other group
     data = request.get_json()
-    user_id = data["user_id"]
     group_id = data["group_id"]
-    print(user_id, group_id)
+    user_id = data["user_id"]
+    date_intended_contract_termination = data["date_intended_contract_termination"]
+    is_landlord = "user"
+    is_finish = False
+
     created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     _, success = server_assistent.query_db(
-        "INSERT INTO group_members (group_id, user_id, user_join_to_group) "
-        "VALUES (?,?,?)",
-        (group_id, user_id, created_date),
+        "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group, date_intended_contract_termination, is_finish) "
+        "VALUES (?,?,?,?,?,?)",
+        (group_id, user_id, is_landlord, created_date, date_intended_contract_termination,is_finish),
     )
+
     if success:
         return jsonify({"status": "success", "group_id": group_id}), 200
     else:
         return jsonify({"status": "fail"}), 500
+
+
+
+
+@app.route("/add_event", methods=["POST"])
+def add_event():
+    data = request.get_json()
+    user_creator_id = data["user_id"]
+    event_name = data["event_name"]
+    event_description = data["event_description"]
+    event_date_string = data["event_date"]
+    date_format = "%Y-%m-%d %H:%M:%S"
+    event_date = datetime.datetime.strptime(event_date_string, date_format)
+    created_date = datetime.datetime.now().strftime(date_format)
+    event_id, success = server_assistent.query_db(
+        "INSERT INTO events (user_creator_id, event_name, event_description, event_date, "
+        "created_date) VALUES (?,?,?,?,?)",
+        (user_creator_id, event_name, event_description, event_date, created_date),
+        True,
+    )
+    if success:
+        if event_id:
+            return (
+                jsonify({"status": "success", "event_id": event_id}),
+                200,
+            )
+        else:
+            return (
+                jsonify({"status": "fail", "message": "Failed to insert this event"}),
+                500,
+            )
+    else:
+        return jsonify({"status": "fail", "message": "Failed to add to DB"}), 500
+
+
+@app.route("/get_events", methods=["POST"])
+def get_events():
+    data = request.get_json()
+
+    table_data, success = server_assistent.query_db("PRAGMA table_info(events)")
+    column_names = [info[1] for info in table_data]
+    curr_date = datetime.datetime.now()
+    rows, success = server_assistent.query_db(
+        "SELECT * FROM events WHERE event_date<=?", (curr_date,)
+    )
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
+
+
+@app.route("/remove_event", methods=["POST"])
+def remove_event():
+    data = request.get_json()
+
+    event_id = data["mission_id"]
+
+    deleted_row, success = server_assistent.query_db(
+        "DELETE FROM events WHERE event_id = ?", (event_id,), True
+    )
+    if success:
+        if deleted_row:
+            return jsonify({"status": "success"}), 200
+        else:
+            return jsonify({"status": "fail", "message": "no row deleted"}), 500
+    else:
+        return jsonify({"status": "fail", "message": "Failed to connect to DB"}), 500
 
 
 if __name__ == "__main__":

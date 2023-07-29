@@ -3,8 +3,11 @@ import sqlite3
 import hashlib
 import secrets
 
+
 DATABASE = 'server.db'
 
+
+# server_assistant.py
 
 def init_db():
     create_users_table()
@@ -15,6 +18,12 @@ def init_db():
     create_bills_table()
     create_outcomes_table()
     create_notifications_table()
+    create_events_table()
+    create_files_table()# Add this line to create the messages table
+
+
+# server_assistant.py
+
 
 
 def create_users_table():
@@ -46,7 +55,9 @@ def create_groups_table():
     cur.execute('''CREATE TABLE IF NOT EXISTS `groups` (
                         group_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         group_name TEXT NOT NULL,
-                        group_details TEXT
+                        group_max_members INTEGER NOT NULL,
+                        group_details TEXT,
+                        end_of_contract TEXT
                     )''')
 
     conn.commit()
@@ -61,11 +72,12 @@ def create_group_members_table():
                     group_member_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
+                    is_landlord INTEGER NOT NULL,
                     user_join_to_group INTEGER NOT NULL,
-
+                    date_intended_contract_termination INTEGER,
+                    is_finish INTEGER NOT NULL,
                     FOREIGN KEY (group_id) REFERENCES groups (group_id),
                     FOREIGN KEY (user_id) REFERENCES users (id),
-
                     UNIQUE(group_id, user_id)
                 )''')
 
@@ -154,6 +166,24 @@ def create_outcomes_table():
     conn.close()
 
 
+def create_events_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS events (
+                        event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_creator_id INTEGER NOT NULL,
+                        event_name TEXT NOT NULL,
+                        event_description TEXT NOT NULL,
+                        event_date TIMESTAMP NOT NULL,                        
+                        created_date TIMESTAMP NOT NULL,
+                        
+                        FOREIGN KEY (user_creator_id) REFERENCES users (user_creator_id)
+                    )''')
+
+    conn.commit()
+    conn.close()
+
 def create_notifications_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
@@ -171,6 +201,22 @@ def create_notifications_table():
 
     conn.commit()
     conn.close()
+
+
+def create_files_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS files (
+                    id INTEGER PRIMARY KEY,
+                    filename TEXT NOT NULL,
+                    filetype TEXT NOT NULL,
+                    data BLOB NOT NULL
+                )''')
+
+    conn.commit()
+    conn.close()
+
 
 
 def query_db(query, args=(), one=False):

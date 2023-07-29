@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { TextInput } from "react-native-paper";
-import Theme from "../../src/Constants/Theme";
+
 export default function PasswordComponent({
   value,
   onChangeText,
@@ -16,9 +16,9 @@ export default function PasswordComponent({
         theme={{ roundness: 5 }}
         style={styles.container}
         value={value}
-        selectionColor={Theme.primary}
-        activeOutlineColor={Theme.primary}
-        outlineColor={Theme.grey}
+        selectionColor="#FF5733"
+        activeOutlineColor="#FF5733"
+        outlineColor="#C0C0C0"
         label={label}
         keyboardType={keyboardType}
         mode="outlined"
@@ -35,9 +35,10 @@ export default function PasswordComponent({
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Theme.white,
+    backgroundColor: "#FFFFFF",
     marginHorizontal: 20,
     marginVertical: 10,
   },

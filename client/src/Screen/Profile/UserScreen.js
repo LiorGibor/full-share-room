@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ProfileScreen({ navigation }) {
+export default function UserScreen({ navigation }) {
   const [userName, setUserName] = useState("asd");
   const [groupID, setGroupID] = useState("");
 

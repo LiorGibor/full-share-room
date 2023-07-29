@@ -1,29 +1,27 @@
 import React, { useState } from "react";
 import { adduser } from "../../api/user_api";
-
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Switch,
+  Button,
+  TextInput 
 } from "react-native";
-import InputFieldComponent from "../../../src/Component/InputFieldComponent";
-import ButtonComponent from "../../../src/Component/ButtonComponent";
-import PasswordComponent from "../../../src/Component/PasswordComponent";
-import Theme from "../../Constants/Theme";
-import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
+
 export default function SignUp({ navigation }) {
-  const [full_name, setName] = useState(""); // In this state whatever name you write will be stored you can use it for sending to server
-  const [email, setEmail] = useState(""); // In this state whatever email you write will be stored you can use it for sending to server
-  const [password, setPassword] = useState(""); // In this state whatever password you write will be stored you can use it for sending to server
-  const [password_confirmation, setPassword_Confirmation] = useState(""); // In this state whatever Confirm Password you write will be stored you can use it for sending to server
+  const [full_name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [password_confirmation, setPassword_Confirmation] = useState("");
   const [username, setUsername] = useState("");
   const [date_of_birth, setDateOfBirth] = useState("");
+  const [role, setRole] = useState("user");
 
   const signUpFun = () => {
-    //Here is your email and password you can send from here
     adduser(
       JSON.stringify({
         username: username.toLocaleLowerCase(),
@@ -31,10 +29,12 @@ export default function SignUp({ navigation }) {
         password: password,
         full_name: full_name,
         date_of_birth: date_of_birth,
+        role: role,
       })
     );
     navigation.navigate("Login");
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -42,7 +42,7 @@ export default function SignUp({ navigation }) {
           style={styles.image}
           name="chevron-back-sharp"
           size={35}
-          color={Theme.primary}
+          color="#FF5733"
         ></Ionicons>
       </TouchableOpacity>
       <View
@@ -55,87 +55,63 @@ export default function SignUp({ navigation }) {
         <Text style={styles.sginInDesign}>Create Account</Text>
       </View>
       <View>
-        {/* Your Name field Component below */}
-
-        <InputFieldComponent
+        <TextInput 
           value={full_name}
-          onChangeText={(full_name) => setName(full_name.trim())}
-          icon="heart"
-          label="Full Name"
+          onChangeText={(text) => setName(text.trim())}
+          placeholder="Full Name"
+          style={styles.inputField}
         />
-        {/* Your Email field Component below */}
-        <InputFieldComponent
+        <TextInput 
           value={email}
-          onChangeText={(email) => setEmail(email.trim())}
-          icon="mail"
-          label="E-mail"
+          onChangeText={(text) => setEmail(text.trim())}
+          placeholder="E-mail"
+          keyboardType="email-address" 
+          style={styles.inputField}
         />
-
-        {/* Your Password field Component below */}
-        <PasswordComponent
+        <TextInput 
           value={password}
-          onChangeText={(password) => setPassword(password.trim())}
-          icon="key"
-          label="Password"
+          onChangeText={(text) => setPassword(text.trim())}
+          placeholder="Password"
+          secureTextEntry={true}
+          style={styles.inputField}
         />
-
-        {/* Your Confirm Password field Component below */}
-        <PasswordComponent
+        <TextInput 
           value={password_confirmation}
-          onChangeText={(password_confirmation) =>
-            setPassword_Confirmation(password_confirmation.trim())
-          }
-          icon="key"
-          label="Confrim Password"
+          onChangeText={(text) => setPassword_Confirmation(text.trim())}
+          placeholder="Confirm Password"
+          secureTextEntry={true}
+          style={styles.inputField}
         />
-        <InputFieldComponent
+        <TextInput 
           value={username}
-          onChangeText={(username) => setUsername(username.trim())}
-          icon="lock"
-          label="Username"
+          onChangeText={(text) => setUsername(text.trim())}
+          placeholder="Username"
+          style={styles.inputField}
         />
-        <InputFieldComponent
+        <TextInput 
           value={date_of_birth}
-          onChangeText={(date_of_birth) => setDateOfBirth(date_of_birth.trim())}
-          icon="star"
-          label="Date Of Birth"
+          onChangeText={(text) => setDateOfBirth(text.trim())}
+          placeholder="Date Of Birth"
+          style={styles.inputField}
         />
+      </View>
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginLeft: 20 }}
+      >
+        <Text style={{ marginRight: 10 }}>Role:</Text>
+        <Switch
+          value={role === "owner"}
+          onValueChange={(value) => setRole(value ? "owner" : "user")}
+        />
+        <Text>{role === "owner" ? "Owner" : "User"}</Text>
       </View>
       <View style={{ marginHorizontal: 20 }}>
-        {/* Signup Button*/}
-        <TouchableOpacity onPress={() => SignUp()}>
-          <ButtonComponent
-            label="Sign Up"
-            backgroundColor={Theme.green}
-            marginLeft={20}
-            marginRight={20}
-            marginTop={10}
-            marginButton={10}
-            labelColor={Theme.white}
-            onPress={() => signUpFun()}
-          />
-        </TouchableOpacity>
-        {/* <ButtonComponent
-          label="Or Sign Up with:"
-          backgroundColor={Theme.black}
-          marginLeft={20}
-          marginRight={20}
-          labelColor={Theme.white}
-        /> */}
+        <Button 
+          title="Sign Up"
+          color="#4CAF50"
+          onPress={() => signUpFun()}
+        />
       </View>
-      {/* Facebook and Google Button Wrapper including Buttons */}
-      {/* <View
-        style={{
-          justifyContent: "center",
-          flexDirection: "row",
-          alignItems: "center",
-          marginVertical: 20,
-        }}
-      >
-        <Entypo name="facebook-with-circle" size={50} color="#1877F2"></Entypo>
-        <View style={{ marginHorizontal: 20 }}></View>
-        <Ionicons name="logo-google" size={50} color="#1877F2"></Ionicons>
-      </View> */}
       <View
         style={{
           flexDirection: "row",
@@ -147,7 +123,7 @@ export default function SignUp({ navigation }) {
           <Text
             style={{
               marginLeft: 5,
-              color: Theme.primary,
+              color: "#FF5733",
               fontWeight: "bold",
               fontSize: 16,
               textDecorationLine: "underline",
@@ -160,13 +136,14 @@ export default function SignUp({ navigation }) {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ffffff",
   },
   sginInDesign: {
-    color: Theme.primary,
+    color: "#FF5733",
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 15,
@@ -177,5 +154,13 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderColor: "#000",
     margin: 10,
+  },
+  inputField: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingLeft: 10,
+    marginVertical: 5,
+    borderRadius: 5,
   },
 });
