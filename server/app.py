@@ -307,15 +307,24 @@ def delete_call():
 def add_group():
     data = request.get_json()
 
+<<<<<<< HEAD
     user_id = data["userID"]
     is_landlord = data["is_landlord"]
+=======
+    user_name = data["email"]
+    is_landlord = data[is_landlord]
+>>>>>>> cf8d27814b55e657b6414de198912220f2356683
     group_name = data["group_name"]
     group_max_members = data["group_max_members"]
     group_description = data["group_description"]
     end_of_contract = data["end_of_contract"]
 
     group_id, success = server_assistent.query_db(
+<<<<<<< HEAD
         "INSERT INTO groups (group_name,group_max_members, group_details,end_of_contract) VALUES (?, ?, ? ,?)",
+=======
+        "INSERT INTO groups (group_name,group_max_members, group_details) VALUES (?, ?, ?)",
+>>>>>>> cf8d27814b55e657b6414de198912220f2356683
         (
             group_name,
             group_max_members,
@@ -327,9 +336,15 @@ def add_group():
         return jsonify({"status": "fail", "message": "Failed to create group"}), 500
     created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     _, success = server_assistent.query_db(
+<<<<<<< HEAD
         "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group,is_finish) "
         "VALUES (?,?,?,?,?)",
         (group_id, user_id, is_landlord, created_date, False),
+=======
+        "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group) "
+        "VALUES (?,?,?,?)",
+        (group_id, user_id, is_landlord, created_date),
+>>>>>>> cf8d27814b55e657b6414de198912220f2356683
     )
     if success:
         return jsonify({"status": "success", "group_id": group_id}), 200
@@ -757,6 +772,20 @@ def get_user_groups():
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
 
+@app.route("/get_user_groups", methods=["POST"])
+def get_user_groups():
+    data = request.get_json()
+    user_id = data["user_id"]
+    print("asdsad", user_id)
+    table_data, success = server_assistent.query_db("PRAGMA table_info(groups)")
+    column_names = [info[1] for info in table_data]
+    rows, success = server_assistent.query_db(
+        "SELECT DISTINCT groups.* FROM groups JOIN group_members ON groups.group_id = group_members.group_id AND group_members.user_id=?", (user_id,))
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    rows_as_dicts = [{key: value.decode("utf-8") if isinstance(value, bytes) else value} for row in rows_as_dicts for key, value in row.items()]
+
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
 
 @app.route("/remove_user_from_group_by_id", methods=["POST"])
 def remove_user_from_group():
@@ -796,6 +825,48 @@ def get_user_details_by_id():
     json_data = json.dumps(rows_as_dicts)
     return json_data, 200
 
+def is_available_group(group_id):
+    delete_users_finished_contract()
+    curr_members = get_curr_num_group_members(group_id)
+    max_members = get_max_members(group_id)
+    return curr_members is not None and max_members is not None and curr_members < max_members
+
+def delete_users_finished_contract():
+    curr_date = datetime.datetime.now()
+    rows, success = server_assistent.query_db(
+        "DELETE FROM group_members WHERE date_intended_contract_termination < ?", (curr_date,)
+    )
+
+def get_max_members(group_id):
+    group_id = group_id[0]
+    group_id = int(group_id)
+    res, success = server_assistent.query_db(
+        "SELECT group_max_members FROM groups WHERE group_id = ?", (group_id,))
+    return res[0][0] if res else None
+
+def get_curr_num_group_members(group_id):
+    group_id = group_id[0]
+    group_id = int(group_id)  # Convert group_id to an integer if needed
+    res, success = server_assistent.query_db(
+        "SELECT COUNT(DISTINCT user_id) FROM group_members WHERE group_id = ?", (group_id,))
+    return res[0][0] if res else None
+
+@app.route("/get_available_groups", methods=["POST"])
+def get_available_groups():
+    all_groups_id, success = server_assistent.query_db(
+        "SELECT group_id FROM groups")
+    rows = []  # Initialize rows as an empty list
+    for group in all_groups_id:
+        if is_available_group(group):
+            group_data = server_assistent.query_db(
+                "SELECT * FROM groups WHERE group_id = ?", (group[0],))
+            rows += group_data[0]  # Append the fetched group data to rows
+
+    table_data, success = server_assistent.query_db("PRAGMA table_info(groups)")
+    column_names = [info[1] for info in table_data]
+    rows_as_dicts = [dict(zip(column_names, row)) for row in rows]
+    json_data = json.dumps(rows_as_dicts)
+    return json_data, 200
 
 def is_available_group(group_id):
     delete_users_finished_contract()
@@ -902,6 +973,7 @@ def get_finished_groups_details():
 def add_user_to_group():
     data = request.get_json()
     group_id = data["group_id"]
+<<<<<<< HEAD
     user_id = data["user_id"]
     date_intended_contract_termination = data["date_intended_contract_termination"]
     is_landlord = "user"
@@ -919,6 +991,17 @@ def add_user_to_group():
             date_intended_contract_termination,
             is_finish,
         ),
+=======
+    date_intended_contract_termination = data["date_intended_contract_termination"]
+    is_landlord = data[is_landlord]
+    print(user_id, group_id)
+
+    created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    _, success = server_assistent.query_db(
+        "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group, date_intended_contract_termination) "
+        "VALUES (?,?,?,?,?)",
+        (group_id, user_id, is_landlord, created_date, date_intended_contract_termination),
+>>>>>>> cf8d27814b55e657b6414de198912220f2356683
     )
 
     if success:
@@ -992,8 +1075,11 @@ def remove_event():
         return jsonify({"status": "fail", "message": "Failed to connect to DB"}), 500
 
 
+<<<<<<< HEAD
 # if __name__ == "__main__":
 #     app.run(host="0.0.0.0", port=5000, debug=True)
+=======
+>>>>>>> cf8d27814b55e657b6414de198912220f2356683
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=False)
 

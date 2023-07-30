@@ -20,107 +20,6 @@ def init_db():
     create_bills_table()
     create_outcomes_table()
     create_notifications_table()
-    create_events_table()
-    create_files_table() 
-    create_chat_rooms_table()
-    create_chat_messages_table()# Add this line to create the messages table
-
-
-# server_assistant.py
-
-
-
-
-
-def add_room(room_name, group_id, user1, user2):
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-    try:
-        print("Asssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss", room_name, group_id, user1, user2)
-        cur.execute(
-            "INSERT INTO chat_rooms (room_name, group_id, user1, user2) VALUES (?, ?, ?, ?)", 
-            (room_name, group_id, user1, user2)
-        )
-        conn.commit()
-        return True
-    except sqlite3.IntegrityError:
-        return False
-    finally:
-        conn.close()
-
-def delete_room(room_name):
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-    cur.execute("DELETE FROM chat_rooms WHERE room_name=?", (room_name,))
-    conn.commit()
-    conn.close()
-
-def get_all_rooms():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-    cur.execute("SELECT room_name, group_id, user1, user2 FROM chat_rooms")
-    rooms = cur.fetchall()
-    conn.close()
-    return rooms
-
-
-# You already have a way to insert a message, but just to make it more modular
-def insert_message(room_id, user_id, message_text, timestamp):
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO chat_messages (room_id, user_id, message_text, timestamp) VALUES (?, ?, ?, ?)",
-        (room_id, user_id, message_text, timestamp)
-    )
-    conn.commit()
-    conn.close()
-
-
-
-
-def create_chat_rooms_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute(
-    """
-    CREATE TABLE IF NOT EXISTS chat_rooms (
-        room_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        room_name TEXT NOT NULL UNIQUE,
-        group_id TEXT,
-        user1 TEXT,
-        user2 TEXT
-    )
-    """
-)
-
-
-    conn.commit()
-    conn.close()
-
-def create_chat_messages_table():
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
-
-    cur.execute(
-        """CREATE TABLE IF NOT EXISTS chat_messages (
-                    message_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    room_id TEXT NOT NULL,
-                    user_id TEXT NOT NULL,
-                    message_text TEXT NOT NULL,
-                    timestamp TIMESTAMP NOT NULL,
-                    FOREIGN KEY (room_id) REFERENCES chat_rooms (room_id),
-                    FOREIGN KEY (user_id) REFERENCES users (id)
-                )"""
-    )
-
-    conn.commit()
-    conn.close()
-
-
-
-
-
 
 
 def create_users_table():
@@ -155,11 +54,8 @@ def create_groups_table():
         """CREATE TABLE IF NOT EXISTS `groups` (
                         group_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         group_name TEXT NOT NULL,
-                        group_max_members INTEGER NOT NULL,
-                        group_details TEXT,
-                        end_of_contract TEXT
-                    )"""
-    )
+                        group_details TEXT
+                    )''')
 
     conn.commit()
     conn.close()
@@ -176,8 +72,7 @@ def create_group_members_table():
                     user_id INTEGER NOT NULL,
                     is_landlord INTEGER NOT NULL,
                     user_join_to_group INTEGER NOT NULL,
-                    date_intended_contract_termination INTEGER,
-                    is_finish INTEGER NOT NULL,
+
                     FOREIGN KEY (group_id) REFERENCES groups (group_id),
                     FOREIGN KEY (user_id) REFERENCES users (id),
                     UNIQUE(group_id, user_id)
@@ -297,6 +192,24 @@ def create_events_table():
     conn.commit()
     conn.close()
 
+
+def create_events_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS events (
+                        event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_creator_id INTEGER NOT NULL,
+                        event_name TEXT NOT NULL,
+                        event_description TEXT NOT NULL,
+                        event_date TIMESTAMP NOT NULL,                        
+                        created_date TIMESTAMP NOT NULL,
+                        
+                        FOREIGN KEY (user_creator_id) REFERENCES users (user_creator_id)
+                    )''')
+
+    conn.commit()
+    conn.close()
 
 def create_notifications_table():
     conn = sqlite3.connect(DATABASE)
