@@ -307,24 +307,15 @@ def delete_call():
 def add_group():
     data = request.get_json()
 
-<<<<<<< HEAD
-    user_id = data["userID"]
-    is_landlord = data["is_landlord"]
-=======
     user_name = data["email"]
     is_landlord = data[is_landlord]
->>>>>>> cf8d27814b55e657b6414de198912220f2356683
     group_name = data["group_name"]
     group_max_members = data["group_max_members"]
     group_description = data["group_description"]
     end_of_contract = data["end_of_contract"]
 
     group_id, success = server_assistent.query_db(
-<<<<<<< HEAD
-        "INSERT INTO groups (group_name,group_max_members, group_details,end_of_contract) VALUES (?, ?, ? ,?)",
-=======
         "INSERT INTO groups (group_name,group_max_members, group_details) VALUES (?, ?, ?)",
->>>>>>> cf8d27814b55e657b6414de198912220f2356683
         (
             group_name,
             group_max_members,
@@ -336,15 +327,9 @@ def add_group():
         return jsonify({"status": "fail", "message": "Failed to create group"}), 500
     created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     _, success = server_assistent.query_db(
-<<<<<<< HEAD
-        "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group,is_finish) "
-        "VALUES (?,?,?,?,?)",
-        (group_id, user_id, is_landlord, created_date, False),
-=======
         "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group) "
         "VALUES (?,?,?,?)",
         (group_id, user_id, is_landlord, created_date),
->>>>>>> cf8d27814b55e657b6414de198912220f2356683
     )
     if success:
         return jsonify({"status": "success", "group_id": group_id}), 200
@@ -973,25 +958,6 @@ def get_finished_groups_details():
 def add_user_to_group():
     data = request.get_json()
     group_id = data["group_id"]
-<<<<<<< HEAD
-    user_id = data["user_id"]
-    date_intended_contract_termination = data["date_intended_contract_termination"]
-    is_landlord = "user"
-    is_finish = False
-
-    created_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    _, success = server_assistent.query_db(
-        "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group, date_intended_contract_termination, is_finish) "
-        "VALUES (?,?,?,?,?,?)",
-        (
-            group_id,
-            user_id,
-            is_landlord,
-            created_date,
-            date_intended_contract_termination,
-            is_finish,
-        ),
-=======
     date_intended_contract_termination = data["date_intended_contract_termination"]
     is_landlord = data[is_landlord]
     print(user_id, group_id)
@@ -1001,7 +967,6 @@ def add_user_to_group():
         "INSERT INTO group_members (group_id, user_id, is_landlord, user_join_to_group, date_intended_contract_termination) "
         "VALUES (?,?,?,?,?)",
         (group_id, user_id, is_landlord, created_date, date_intended_contract_termination),
->>>>>>> cf8d27814b55e657b6414de198912220f2356683
     )
 
     if success:
@@ -1009,7 +974,7 @@ def add_user_to_group():
     else:
         return jsonify({"status": "fail"}), 500
 
-
+##
 @app.route("/add_event", methods=["POST"])
 def add_event():
     data = request.get_json()
@@ -1075,11 +1040,6 @@ def remove_event():
         return jsonify({"status": "fail", "message": "Failed to connect to DB"}), 500
 
 
-<<<<<<< HEAD
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5000, debug=True)
-=======
->>>>>>> cf8d27814b55e657b6414de198912220f2356683
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=False)
 
