@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, StyleSheet, Text, View, FlatList } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Button,
+} from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function NotificationScreen({ navigation }) {
   const [userID, setUserID] = useState("");
   const [groupID, setGroupID] = useState("");
-  const [filteredTitles, setFilteredTitles] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const fetchGroupID = async () => {
@@ -23,31 +30,48 @@ export default function NotificationScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      const data = JSON.stringify({
-        group_id: groupID,
-      });
-      try {
-        const response = await axios.post(
-          "http://localhost:5000/notifications_from_group_id",
-          data,
-          {
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-        const filteredNotifications = response.data.filter(
-          (notification) => String(notification.user_id) !== userID
-        );
-        const filteredTitles = filteredNotifications.map(
-          (notification) => notification.notification_name
-        );
-        setFilteredTitles(filteredTitles);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    if (groupID !== "") fetchNotifications();
+    if (groupID !== "" && userID !== "") fetchNotifications();
   }, [groupID, userID]);
+
+  const fetchNotifications = async () => {
+    const data = JSON.stringify({
+      group_id: groupID,
+    });
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/notifications_from_group_id",
+        data,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const filteredNotifications = response.data.filter(
+        (notification) => String(notification.user_id) !== userID
+      );
+      setNotifications(filteredNotifications);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const removeNotification = async (notificationId) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/remove_notification",
+        { notification_id: notificationId },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (response.data.status === "success") {
+        fetchNotifications();
+      } else {
+        console.error("Failed to delete notification");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -56,13 +80,19 @@ export default function NotificationScreen({ navigation }) {
       </View>
       <View style={styles.content}>
         <FlatList
-          data={filteredTitles}
+          data={notifications}
           renderItem={({ item }) => (
             <View style={styles.notificationContainer}>
-              <Text style={styles.notificationTitle}>{item}</Text>
+              <Text style={styles.notificationTitle}>
+                {item.notification_name}
+              </Text>
+              <Button
+                title="Delete"
+                onPress={() => removeNotification(item.notification_id)}
+              />
             </View>
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.notification_id)}
           contentContainerStyle={styles.listContent}
         />
       </View>

@@ -13,9 +13,10 @@ import axios from "axios";
 import { showMessage, hideMessage } from "react-native-flash-message";
 import FlashMessage from "react-native-flash-message";
 
-const GroupPage = ({ navigation }) => {
-  const [userID, setUserID] = useState(0);
+const CreateGroup = ({ navigation }) => {
+  // const [userID, setUserID] = useState(0);
   const [groupID, setGroupID] = useState("");
+  const [userID, setUserID] = useState("");
   const [email, setEmail] = useState("");
   const [memberNames, setMemberNames] = useState([]);
   const [isLandlord, setIsLandlord] = useState(false);
@@ -23,82 +24,78 @@ const GroupPage = ({ navigation }) => {
   const [groupMaxMembers, setGroupMaxMembers] = useState(0);
   const [groupDescription, setGroupDescription] = useState("");
   const [dateTermination, setDateTermination] = useState("");
-  const [isFinishStatus, setIsFinishStatus] = useState(false); // Added state for is_finish status
 
   const [isFocused, setIsFocused] = useState(false);
 
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
 
-  const handleToggleFinishStatus = async () => {
-    try {
-      // Make an API call to the backend to toggle the is_finish status
-      const response = await axios.post("http://localhost:5000/toggle_finish", {
-        user_id: userID,
-      });
+  // const handleGetUserIdDetails = async () => {
+  //   const data = JSON.stringify({
+  //     email: email, // replace with the email of the current user
+  //   });
+  //   try {
+  //     console.log(data);
+  //     const response = await axios.post(
+  //       "http://localhost:5000/id_from_email",
+  //       data,
+  //       {
+  //         headers: { "Content-Type": "application/json" },
+  //       }
+  //     );
+  //     setUserID(response.data.user);
+  //     console.log(userID);
+  //     console.log(response.data.user);
+  //   } catch (error) {
+  //     console.log(error);
+  //     Alert.alert("Error", "Unable to get group details");
+  //   }
+  // };
 
-      if (response.status === 200 && response.data.status === "success") {
-        setIsFinishStatus(!isFinishStatus); // Toggle the local state variable
-        showMessage({
-          message: "Success",
-          description: "Contract status updated successfully",
-          type: "success",
-        });
-      } else {
-        throw new Error("Failed to update contract status.");
-      }
-    } catch (error) {
-      console.log(error);
-      showMessage({
-        message: "Error",
-        description: "Unable to update contract status",
-        type: "danger",
-      });
-    }
-  };
 
-  const handleAddUserToGroup = async (dateIntendedContractTermination) => {
+
+  const handleCreateNewGroup = async () => {
+    console.log("end" ,dateTermination )
+
     try {
       const data = {
-        user_id: userID, // Assuming the email is being used as the user ID
-        group_id: groupID,
-        date_intended_contract_termination: dateIntendedContractTermination,
+        userID: userID,
         is_landlord: isLandlord,
+        group_name: groupName,
+        group_max_members: groupMaxMembers,
+        group_description: groupDescription,
+        end_of_contract : dateTermination,
       };
 
       const response = await axios.post(
-        "http://localhost:5000/add_user_to_group",
+        "http://localhost:5000/add_group",
         data
       );
-
-      if (response.status === 200 && response.data.status === "success") {
+      if (response.status === 200) {
         showMessage({
           message: "Success",
-          description: "User added to group successfully",
+          description: "Group created successfully",
           type: "success",
         });
-      } else {
-        throw new Error("Failed to add user to group.");
+        console.log("Asd", response.data);
+        setGroupID(response.data.group_id);
+        AsyncStorage.setItem("groupID", response.data.group_id);
       }
     } catch (error) {
       console.log(error);
       showMessage({
         message: "Error",
-        description: "Unable to add user to group",
+        description: "Unable to create group",
         type: "danger",
       });
     }
   };
 
-  const handleGetGroupIdDetails = () => {
-    // setGroupID(response.data.group);
-    console.log("groupID", groupID);
-    Alert.alert("Group Number", `The group number is ${groupID}`);
-  };
+
 
   const handleGetGroupDetailsById = async () => {
     try {
-      console.log("groupID", groupID);
+      console.log("groupID", groupID)
       const data = { group_id: groupID };
 
       const response = await axios.post(
@@ -128,11 +125,12 @@ const GroupPage = ({ navigation }) => {
   useEffect(() => {
     const fetchGroupID = async () => {
       const storedGroupID = await AsyncStorage.getItem("groupID");
-      console.log("storedGroupID", storedGroupID);
+      console.log("storedGroupID", storedGroupID)
       setGroupID(storedGroupID);
     };
     const fetchUserID = async () => {
       const storedUserID = await AsyncStorage.getItem("userID");
+      console.log("storedUserID", storedUserID)
       setUserID(storedUserID);
     };
     const fetchUserName = async () => {
@@ -143,73 +141,73 @@ const GroupPage = ({ navigation }) => {
     fetchUserID();
     fetchGroupID();
     fetchUserName();
+
   }, []);
+
 
   useEffect(() => {
     handleGetGroupDetailsById();
   }, [groupID]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}></View>
 
+    <View style={styles.container}>
+    
       <View style={styles.header}>
-        <Text style={styles.title}>Join Existing Group</Text>
+      <Text style={styles.title}>You are a house owner</Text>
+
+        <Text style={styles.title}>Create New Group</Text>
       </View>
       <View style={styles.content}>
         <TextInput
-          style={[styles.textInput, isFocused && styles.focused]}
-          placeholder="Enter Group Number"
-          placeholderTextColor="#999"
-          onChangeText={setGroupID}
-          value={groupID}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          style={styles.textInput}
+          placeholder="Apartment Address ( Street & Number )"
+          onChangeText={setGroupName}
+          value={groupName}
         />
-      </View>
+                <Text style={styles.title}>Apartment Max Members</Text>
 
-      <TouchableOpacity
+        <TextInput
+          style={styles.textInput}
+          placeholder="Apartment Max Members"
+          keyboardType="numeric"
+          onChangeText={(text) => setGroupMaxMembers(Number(text))}
+          value={groupMaxMembers.toString()}
+        />
+        <TextInput
+          style={styles.textInput}
+          placeholder="Apartment City"
+          onChangeText={setGroupDescription}
+          value={groupDescription}
+        />
+        <TextInput
+          style={styles.textInput}
+          placeholder="End Of Contract"
+          onChangeText={setDateTermination}
+          value={dateTermination}
+        />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 16,
+          }}
+        >
+        
+        </View>
+        <TouchableOpacity style={styles.button} onPress={handleCreateNewGroup}>
+          <Text style={styles.buttonText}>Create New Group</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
         style={styles.bottomButton}
-        onPress={() => navigation.navigate("UserPage")}
+        onPress={() => navigation.navigate("OwnerPage")}
       >
         <Text style={styles.bottomButtonText}>Home</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => handleAddUserToGroup(dateTermination)}
-      >
-        <Text style={styles.buttonText}>
-          Fill Group id and Join Existing Group
-        </Text>
-      </TouchableOpacity>
-      <View style={styles.header}>
-        <Text style={styles.title}>Appartement Members</Text>
-      </View>
-
-      <View style={styles.content}>
-        {/* Display the member names in a table */}
-        <View style={styles.table}>
-          <Text style={styles.tableHeader}>Appartement Members</Text>
-          {memberNames.map((name, index) => (
-            <Text key={index} style={styles.tableRow}>
-              {name}
-            </Text>
-          ))}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleToggleFinishStatus}
-          >
-            <Text style={styles.buttonText}>
-              {isFinishStatus
-                ? "Mark Contract as Unfinished"
-                : "Mark Contract as Finished"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <FlashMessage position="top" />
     </View>
+        </View>
+
   );
 };
 
@@ -276,4 +274,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GroupPage;
+export default CreateGroup;

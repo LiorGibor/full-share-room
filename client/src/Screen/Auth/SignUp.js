@@ -1,29 +1,28 @@
 import React, { useState } from "react";
 import { adduser } from "../../api/user_api";
-
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Switch,
+  Button,
+  TextInput,
 } from "react-native";
-import InputFieldComponent from "../../../src/Component/InputFieldComponent";
-import ButtonComponent from "../../../src/Component/ButtonComponent";
-import PasswordComponent from "../../../src/Component/PasswordComponent";
-import Theme from "../../Constants/Theme";
-import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { COLORS } from "../../constants";
+
 export default function SignUp({ navigation }) {
-  const [full_name, setName] = useState(""); // In this state whatever name you write will be stored you can use it for sending to server
-  const [email, setEmail] = useState(""); // In this state whatever email you write will be stored you can use it for sending to server
-  const [password, setPassword] = useState(""); // In this state whatever password you write will be stored you can use it for sending to server
-  const [password_confirmation, setPassword_Confirmation] = useState(""); // In this state whatever Confirm Password you write will be stored you can use it for sending to server
+  const [full_name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [password_confirmation, setPassword_Confirmation] = useState("");
   const [username, setUsername] = useState("");
   const [date_of_birth, setDateOfBirth] = useState("");
+  const [role, setRole] = useState("user");
 
   const signUpFun = () => {
-    //Here is your email and password you can send from here
     adduser(
       JSON.stringify({
         username: username.toLocaleLowerCase(),
@@ -31,10 +30,12 @@ export default function SignUp({ navigation }) {
         password: password,
         full_name: full_name,
         date_of_birth: date_of_birth,
+        role: role,
       })
     );
     navigation.navigate("Login");
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -42,140 +43,139 @@ export default function SignUp({ navigation }) {
           style={styles.image}
           name="chevron-back-sharp"
           size={35}
-          color={Theme.primary}
-        ></Ionicons>
+          color="#FF5733"
+        />
       </TouchableOpacity>
-      <View
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          height: "10%",
-        }}
-      >
-        <Text style={styles.sginInDesign}>Create Account</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerText}>Create Account</Text>
       </View>
-      <View>
-        {/* Your Name field Component below */}
-
-        <InputFieldComponent
+      <View style={styles.inputContainer}>
+        <TextInput
           value={full_name}
-          onChangeText={(full_name) => setName(full_name.trim())}
-          icon="heart"
-          label="Full Name"
+          onChangeText={(text) => setName(text.trim())}
+          placeholder="Full Name"
+          style={styles.inputField}
         />
-        {/* Your Email field Component below */}
-        <InputFieldComponent
+        <TextInput
           value={email}
-          onChangeText={(email) => setEmail(email.trim())}
-          icon="mail"
-          label="E-mail"
+          onChangeText={(text) => setEmail(text.trim())}
+          placeholder="E-mail"
+          keyboardType="email-address"
+          style={styles.inputField}
         />
-
-        {/* Your Password field Component below */}
-        <PasswordComponent
+        <TextInput
           value={password}
-          onChangeText={(password) => setPassword(password.trim())}
-          icon="key"
-          label="Password"
+          onChangeText={(text) => setPassword(text.trim())}
+          placeholder="Password"
+          secureTextEntry={true}
+          style={styles.inputField}
         />
-
-        {/* Your Confirm Password field Component below */}
-        <PasswordComponent
+        <TextInput
           value={password_confirmation}
-          onChangeText={(password_confirmation) =>
-            setPassword_Confirmation(password_confirmation.trim())
-          }
-          icon="key"
-          label="Confrim Password"
+          onChangeText={(text) => setPassword_Confirmation(text.trim())}
+          placeholder="Confirm Password"
+          secureTextEntry={true}
+          style={styles.inputField}
         />
-        <InputFieldComponent
+        <TextInput
           value={username}
-          onChangeText={(username) => setUsername(username.trim())}
-          icon="lock"
-          label="Username"
+          onChangeText={(text) => setUsername(text.trim())}
+          placeholder="Username"
+          style={styles.inputField}
         />
-        <InputFieldComponent
+        <TextInput
           value={date_of_birth}
-          onChangeText={(date_of_birth) => setDateOfBirth(date_of_birth.trim())}
-          icon="star"
-          label="Date Of Birth"
+          onChangeText={(text) => setDateOfBirth(text.trim())}
+          placeholder="Date Of Birth"
+          style={styles.inputField}
         />
       </View>
-      <View style={{ marginHorizontal: 20 }}>
-        {/* Signup Button*/}
-        <TouchableOpacity onPress={() => SignUp()}>
-          <ButtonComponent
-            label="Sign Up"
-            backgroundColor={Theme.green}
-            marginLeft={20}
-            marginRight={20}
-            marginTop={10}
-            marginButton={10}
-            labelColor={Theme.white}
-            onPress={() => signUpFun()}
-          />
-        </TouchableOpacity>
-        {/* <ButtonComponent
-          label="Or Sign Up with:"
-          backgroundColor={Theme.black}
-          marginLeft={20}
-          marginRight={20}
-          labelColor={Theme.white}
-        /> */}
+      <View style={styles.roleContainer}>
+        <Text style={styles.roleLabel}>Role:</Text>
+        <Switch
+          value={role === "owner"}
+          onValueChange={(value) => setRole(value ? "owner" : "user")}
+        />
+        <Text style={styles.roleText}>
+          {role === "owner" ? "Owner" : "User"}
+        </Text>
       </View>
-      {/* Facebook and Google Button Wrapper including Buttons */}
-      {/* <View
-        style={{
-          justifyContent: "center",
-          flexDirection: "row",
-          alignItems: "center",
-          marginVertical: 20,
-        }}
-      >
-        <Entypo name="facebook-with-circle" size={50} color="#1877F2"></Entypo>
-        <View style={{ marginHorizontal: 20 }}></View>
-        <Ionicons name="logo-google" size={50} color="#1877F2"></Ionicons>
-      </View> */}
-      <View
-        style={{
-          flexDirection: "row",
-          marginVertical: 10,
-          alignSelf: "center",
-        }}
-      >
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Sign Up"
+          color={COLORS.PRIMARY_GREEN}
+          onPress={() => signUpFun()}
+        />
+      </View>
+      <View style={styles.signInContainer}>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text
-            style={{
-              marginLeft: 5,
-              color: Theme.primary,
-              fontWeight: "bold",
-              fontSize: 16,
-              textDecorationLine: "underline",
-            }}
-          >
-            Sign In
-          </Text>
+          <Text style={styles.signInText}>Sign In</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f2f2f2",
+    paddingHorizontal: 20,
   },
-  sginInDesign: {
-    color: Theme.primary,
-    fontSize: 20,
+  headerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  headerText: {
+    color: COLORS.PRIMARY_GREEN,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 15,
   },
   image: {
+    alignSelf: "flex-start",
     height: 30,
     width: 50,
-    borderRadius: 25,
-    borderColor: "#000",
-    margin: 10,
+    marginVertical: 10,
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputField: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    backgroundColor: "#fff",
+    paddingLeft: 15,
+    marginVertical: 5,
+    borderRadius: 10,
+  },
+  roleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  roleLabel: {
+    fontSize: 18,
+    fontWeight: "500",
+    marginRight: 10,
+  },
+  roleText: {
+    marginLeft: 5,
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  buttonContainer: {
+    marginBottom: 20,
+  },
+  signInContainer: {
+    flexDirection: "row",
+    alignSelf: "center",
+  },
+  signInText: {
+    color: COLORS.PRIMARY_GREEN,
+    fontWeight: "bold",
+    fontSize: 16,
+    textDecorationLine: "underline",
   },
 });

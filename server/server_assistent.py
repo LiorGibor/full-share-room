@@ -2,8 +2,13 @@ from flask import Flask, request, jsonify
 import sqlite3
 import hashlib
 import secrets
+from flask_socketio import SocketIO, join_room, leave_room, emit
 
-DATABASE = 'server.db'
+
+DATABASE = "server.db"
+
+
+# server_assistant.py
 
 
 def init_db():
@@ -15,13 +20,115 @@ def init_db():
     create_bills_table()
     create_outcomes_table()
     create_notifications_table()
+    create_events_table()
+    create_files_table() 
+    create_chat_rooms_table()
+    create_chat_messages_table()# Add this line to create the messages table
+
+
+# server_assistant.py
+
+
+
+
+
+def add_room(room_name, group_id, user1, user2):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    try:
+        print("Asssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss", room_name, group_id, user1, user2)
+        cur.execute(
+            "INSERT INTO chat_rooms (room_name, group_id, user1, user2) VALUES (?, ?, ?, ?)", 
+            (room_name, group_id, user1, user2)
+        )
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+def delete_room(room_name):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM chat_rooms WHERE room_name=?", (room_name,))
+    conn.commit()
+    conn.close()
+
+def get_all_rooms():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute("SELECT room_name, group_id, user1, user2 FROM chat_rooms")
+    rooms = cur.fetchall()
+    conn.close()
+    return rooms
+
+
+# You already have a way to insert a message, but just to make it more modular
+def insert_message(room_id, user_id, message_text, timestamp):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO chat_messages (room_id, user_id, message_text, timestamp) VALUES (?, ?, ?, ?)",
+        (room_id, user_id, message_text, timestamp)
+    )
+    conn.commit()
+    conn.close()
+
+
+
+
+def create_chat_rooms_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute(
+    """
+    CREATE TABLE IF NOT EXISTS chat_rooms (
+        room_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        room_name TEXT NOT NULL UNIQUE,
+        group_id TEXT,
+        user1 TEXT,
+        user2 TEXT
+    )
+    """
+)
+
+
+    conn.commit()
+    conn.close()
+
+def create_chat_messages_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS chat_messages (
+                    message_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    room_id TEXT NOT NULL,
+                    user_id TEXT NOT NULL,
+                    message_text TEXT NOT NULL,
+                    timestamp TIMESTAMP NOT NULL,
+                    FOREIGN KEY (room_id) REFERENCES chat_rooms (room_id),
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )"""
+    )
+
+    conn.commit()
+    conn.close()
+
+
+
+
+
 
 
 def create_users_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS users (
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             username TEXT NOT NULL,
                             hashedPassword TEXT NOT NULL,
@@ -33,7 +140,8 @@ def create_users_table():
                             updatedAt TIMESTAMP NOT NULL,
                             lastLogin TIMESTAMP NOT NULL,
                             role TEXT NOT NULL
-                        )''')
+                        )"""
+    )
 
     conn.commit()
     conn.close()
@@ -43,11 +151,15 @@ def create_groups_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS `groups` (
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS `groups` (
                         group_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         group_name TEXT NOT NULL,
-                        group_details TEXT
-                    )''')
+                        group_max_members INTEGER NOT NULL,
+                        group_details TEXT,
+                        end_of_contract TEXT
+                    )"""
+    )
 
     conn.commit()
     conn.close()
@@ -57,17 +169,20 @@ def create_group_members_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS group_members (
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS group_members (
                     group_member_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
+                    is_landlord INTEGER NOT NULL,
                     user_join_to_group INTEGER NOT NULL,
-
+                    date_intended_contract_termination INTEGER,
+                    is_finish INTEGER NOT NULL,
                     FOREIGN KEY (group_id) REFERENCES groups (group_id),
                     FOREIGN KEY (user_id) REFERENCES users (id),
-
                     UNIQUE(group_id, user_id)
-                )''')
+                )"""
+    )
 
     conn.commit()
     conn.close()
@@ -77,7 +192,8 @@ def create_faults_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS faults (
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS faults (
                     fault_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     fault_name TEXT NOT NULL,
@@ -86,7 +202,8 @@ def create_faults_table():
                     fixed BOOLEAN NOT NULL,
 
                     FOREIGN KEY (group_id) REFERENCES groups (group_id)
-                )''')
+                )"""
+    )
 
     conn.commit()
     conn.close()
@@ -96,7 +213,8 @@ def create_missions_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS missions (
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS missions (
                     mission_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     mission_name TEXT NOT NULL,
@@ -105,7 +223,8 @@ def create_missions_table():
                     completed BOOLEAN NOT NULL,
 
                     FOREIGN KEY (group_id) REFERENCES groups (group_id)
-                )''')
+                )"""
+    )
 
     conn.commit()
     conn.close()
@@ -115,7 +234,8 @@ def create_bills_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS bills (
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS bills (
                     bill_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER,
@@ -126,7 +246,8 @@ def create_bills_table():
 
                     FOREIGN KEY (group_id) REFERENCES group_members (group_id),
                     FOREIGN KEY (user_id) REFERENCES group_members (user_id)
-                )''')
+                )"""
+    )
 
     conn.commit()
     conn.close()
@@ -136,7 +257,8 @@ def create_outcomes_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS outcomes (
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS outcomes (
                     outcome_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
@@ -148,7 +270,29 @@ def create_outcomes_table():
 
                     FOREIGN KEY (group_id) REFERENCES group_members (group_id),
                     FOREIGN KEY (user_id) REFERENCES group_members (user_id)
-                )''')
+                )"""
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def create_events_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS events (
+                        event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_creator_id INTEGER NOT NULL,
+                        event_name TEXT NOT NULL,
+                        event_description TEXT NOT NULL,
+                        event_date TIMESTAMP NOT NULL,                        
+                        created_date TIMESTAMP NOT NULL,
+                        
+                        FOREIGN KEY (user_creator_id) REFERENCES users (user_creator_id)
+                    )"""
+    )
 
     conn.commit()
     conn.close()
@@ -158,7 +302,8 @@ def create_notifications_table():
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS notifications (
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS notifications (
                     notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     group_id INTEGER NOT NULL,
                     user_id INTEGER NOT NULL,
@@ -167,7 +312,25 @@ def create_notifications_table():
 
                     FOREIGN KEY (group_id) REFERENCES group_members (group_id),
                     FOREIGN KEY (user_id) REFERENCES group_members (user_id)
-                )''')
+                )"""
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def create_files_table():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute(
+        """CREATE TABLE IF NOT EXISTS files (
+                    id INTEGER PRIMARY KEY,
+                    filename TEXT NOT NULL,
+                    filetype TEXT NOT NULL,
+                    data BLOB NOT NULL
+                )"""
+    )
 
     conn.commit()
     conn.close()
@@ -187,7 +350,7 @@ def query_db(query, args=(), one=False):
 
         result = cur.fetchall()
         if query.strip().upper().startswith("DELETE"):
-            result =cur.rowcount
+            result = cur.rowcount
             return result, True
         conn.close()
 
@@ -205,3 +368,4 @@ def query_db(query, args=(), one=False):
 
 def generate_token():
     return secrets.token_hex(16)
+

@@ -2,7 +2,6 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useState, useCallback, useEffect } from "react";
 import { GiftedChat } from "react-native-gifted-chat";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import Theme from "../../Constants/Theme";
 export default function ChatScreen({ navigation, route }) {
   //Below name came from past screen where lost is render
   const { name } = route.params;
@@ -41,7 +40,7 @@ export default function ChatScreen({ navigation, route }) {
             style={styles.image}
             name="chevron-back-sharp"
             size={35}
-            color={Theme.primary}
+            color="#7B7BC4"
           ></Ionicons>
         </View>
         <Text style={styles.textStyle}>{name}</Text>
@@ -56,6 +55,7 @@ export default function ChatScreen({ navigation, route }) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: "column",

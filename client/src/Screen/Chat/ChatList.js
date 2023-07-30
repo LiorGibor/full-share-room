@@ -1,92 +1,65 @@
-import React, { useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View, FlatList } from "react-native";
-import ItemPopular from "../CommonComponent/ItemPopular";
-// Below is a list of static chat that will be dynamic
-const DATA = [
-  {
-    title: "Yehuda Halevi 52",
-    detial: "Relevant",
-    price: "3400",
-    image:
-      "https://www.sabresim.co.il/sites/default/files/styles/display800x600/public/jl2.jpg?itok=Sm-HjxAW",
-    orderID: "1232",
-  },
-  {
-    title: "Rotchild 36",
-    detial: "Relevant",
-    price: "280",
-    image:
-      "https://www.sabresim.co.il/sites/default/files/styles/display800x600/public/jl2.jpg?itok=Sm-HjxAW",
-    orderID: "1232",
-  },
-  {
-    title: "Nachmani 22",
-    detial: "Not Relevant",
-    price: "380",
-    orderID: "3456",
-    image:
-      "https://www.sabresim.co.il/sites/default/files/styles/display800x600/public/jl.jpg?itok=SXEGjdoy",
-  },
-  {
-    title: "Hagibor 12",
-    detial: "Not Relevant",
-    price: "100",
-    image:
-      "https://www.sabresim.co.il/sites/default/files/styles/display800x600/public/jl.jpg?itok=SXEGjdoy",
-    orderID: "4567",
-  },
-  {
-    title: "Shir 10",
-    detial: "Relevant",
-    price: "230",
-    image:
-      "https://www.sabresim.co.il/sites/default/files/styles/display800x600/public/jl.jpg?itok=SXEGjdoy",
-    orderID: "9765",
-  },
-  {
-    title: "Gilboa 90",
-    detial: "Waiting for final answer",
-    price: "830",
-    orderID: "36677",
-    image:
-      "https://www.sabresim.co.il/sites/default/files/styles/display800x600/public/jl.jpg?itok=SXEGjdoy",
-  },
-];
-export default function ChatList({ navigation }) {
+import React, { useState, useEffect } from "react";
+import { View, Text, Button, FlatList, TextInput } from "react-native";
+import io from "socket.io-client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const ChatList = ({ navigation }) => {
+  const [rooms, setRooms] = useState([]);
+  const [newRoomName, setNewRoomName] = useState("");
+  const [userID, setUserID] = useState(0);
+  const [groupID, setGroupID] = useState(0);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const socket = io("http://localhost:5000");
+
+    // Fetch existing rooms
+    socket.emit("get_rooms");
+
+    socket.on("room_list", (data) => {
+      setRooms(data);
+    });
+
+    socket.on("error", (data) => {
+      alert(data.error);
+    });
+
+    return () => socket.close();
+  }, []);
+
+  useEffect(() => {
+    const fetchGroupID = async () => {
+      const storedGroupID = await AsyncStorage.getItem("groupID");
+      setGroupID(storedGroupID);
+    };
+    const fetchUserID = async () => {
+      const storedUserID = await AsyncStorage.getItem("userID");
+      setUserID(storedUserID);
+    };
+    const fetchUserName = async () => {
+      const storedUserName = await AsyncStorage.getItem("userName");
+      setUserName(storedUserName);
+    };
+
+    fetchUserID();
+    fetchGroupID();
+    fetchUserName();
+  }, []);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View>
-        <Text style={styles.textStyle}>Conversation</Text>
-      </View>
-      {/* Below is the list of all the chatlist which show when click on chat button from bottom for now this data also coming from above static data */}
+    <View style={{ flex: 1, padding: 10 }}>
       <FlatList
-        style={{ marginEnd: 10, marginEnd: 10 }}
-        data={DATA}
+        data={rooms.filter((room) => room[2] === userID)} // Filter the rooms here based on the data[2]
         renderItem={({ item }) => (
-          //Below is a design of how it look like in a list
-          <ItemPopular item={item} navigation={navigation} />
+          <Button
+            title={item[0]} // data[0] is the name of the room for display.
+            onPress={() => navigation.navigate("ChatRoom", { room: item[0] })}
+          />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => index.toString()}
       />
-    </SafeAreaView>
+    </View>
   );
-}
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "column",
-    backgroundColor: "#F2F2F2",
-    flex: 1,
-    borderRadius: 15,
-    shadowColor: "grey",
-    shadowRadius: 10,
-    shadowOpacity: 0.6,
-    elevation: 8,
-  },
-  textStyle: {
-    color: "#000",
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 15,
-  },
-});
+};
+
+export default ChatList;

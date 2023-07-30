@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ProfileScreen({ navigation }) {
+export default function OwnerScreen({ navigation }) {
   const [userName, setUserName] = useState("asd");
   const [groupID, setGroupID] = useState("");
 
@@ -29,7 +29,6 @@ export default function ProfileScreen({ navigation }) {
     const fetchGroupID = async () => {
       const storedGroupID = await AsyncStorage.getItem("groupID");
       setGroupID(storedGroupID);
-      // call loadFaults() when groupID is loaded
     };
 
     fetchGroupID();
@@ -65,8 +64,9 @@ export default function ProfileScreen({ navigation }) {
         </TouchableOpacity>{" "}
       </View>
       <Text style={styles.textStyle}>Menu</Text>
-      {/* Render all the buttons below */}
+
       <ScrollView>
+        {/* Keeping the Owner specific tasks but giving them the same styling as User tasks */}
         <View
           style={{
             flexDirection: "row",
@@ -77,97 +77,26 @@ export default function ProfileScreen({ navigation }) {
           }}
         >
           <TouchableOpacity
-            style={[
-              styles.box,
-              { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
-            ]}
+            style={styles.box}
             onPress={() => {
-              groupID !== "undefined" ? handleNavigate("ManageTasks") : null;
+              handleNavigate("CreateGroup");
             }}
           >
             <Text numberOfLines={2} style={styles.textBox}>
-              Manage Task
+              Create Group
             </Text>
           </TouchableOpacity>
           <View style={{ flex: 1 }}></View>
           <TouchableOpacity
-            style={[
-              styles.box,
-              { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
-            ]}
+            style={styles.box}
             onPress={() => {
-              groupID !== "undefined" ? handleNavigate("ApplyRequest") : null;
+              handleNavigate("AdminRequestPage");
             }}
           >
-            <Text style={styles.textBox}>
-              Opening a new call for the apartment owner
-            </Text>
+            <Text style={styles.textBox}>Admin Requests</Text>
           </TouchableOpacity>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 10,
-            marginHorizontal: 20,
-          }}
-        >
-          <TouchableOpacity
-            style={[
-              styles.box,
-              { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
-            ]}
-            onPress={() => {
-              groupID !== "undefined" ? handleNavigate("SplitPayments") : null;
-            }}
-          >
-            <Text numberOfLines={2} style={styles.textBox}>
-              Manage Outcomes
-            </Text>
-          </TouchableOpacity>
-          <View style={{ flex: 1 }}></View>
-          <TouchableOpacity
-            style={[
-              styles.box,
-              { backgroundColor: groupID !== "undefined" ? "#B4C7E7" : "gray" },
-            ]}
-            onPress={() => {
-              groupID !== "undefined"
-                ? handleNavigate("UploadDocumentPage")
-                : null;
-            }}
-          >
-            <Text style={styles.textBox}>Upload Documents</Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 10,
-            marginHorizontal: 20,
-          }}
-        >
-          <View style={{ flex: 1 }}></View>
-          <TouchableOpacity
-            style={[styles.box, { backgroundColor: "#B4C7E7" }]}
-            onPress={() => {
-              handleNavigate("GroupPage");
-            }}
-          >
-            <Text style={styles.textBox}>Join Group</Text>
-          </TouchableOpacity>
-        </View>
-        <br></br>
-        <br></br>
-        <br></br>
-        {groupID === "undefined" ? (
-          <Text style={styles.textBox}>
-            First join group and than the functions will be available{" "}
-          </Text>
-        ) : null}
+        {/* Add more owner-specific tasks styled the same way */}
       </ScrollView>
     </View>
   );
@@ -191,7 +120,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     elevation: 8,
     height: 150,
+    backgroundColor: "#ADD8E6", // Light blue color added here
   },
+
   image: {
     height: 50,
     width: 50,
@@ -199,7 +130,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   textStyle: {
-    color: "#000",
+    color: "#022",
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",

@@ -6,27 +6,27 @@ import {
   TouchableOpacity,
   View,
   Image,
-  Alert,
+  Button,
+  TextInput,
 } from "react-native";
-import InputFieldComponent from "../../../src/Component/InputFieldComponent";
-import ButtonComponent from "../../../src/Component/ButtonComponent";
 import PasswordComponent from "../../../src/Component/PasswordComponent";
-import Entypo from "@expo/vector-icons/Entypo";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { user_login } from "../../api/user_api";
 import { UserContext } from "../../api/UserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import CustomTextInput from "../../Component/TextInputComponent";
 
-import Theme from "../../Constants/Theme";
+import { COLORS, API_URLS } from "../../constants";
+
 export default function Login({ navigation }) {
-  const [email, setEmail] = useState(""); // In this state whatever email you write will be stored you can use it for sending to server
-  const [password, setPassword] = useState(""); // In this state whatever password you write will be stored you can use it for sending to server
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [checkValidEmail, setCheckValidEmail] = useState(false);
   const [userID, setUserID] = useState("");
   const [userName, setUserName] = useState("");
   const [groupID, setGroupID] = useState("");
-  const [errorMessage, setErrorMessage] = useState(""); // new state to hold error message
+  const [errorMessage, setErrorMessage] = useState("");
+  const [role, setRole] = useState("");
 
   const handleLogin = () => {
     console.log("in");
@@ -112,14 +112,15 @@ export default function Login({ navigation }) {
     try {
       console.log(data);
       const response = await axios.post(
-        "http://localhost:5000/user_name_from_id",
+        "http://localhost:5000/get_user_details_by_id",
         data,
         {
           headers: { "Content-Type": "application/json" },
         }
       );
       console.log("ASdasdasd", response.data);
-      setUserName(response.data.user_name);
+      setUserName(response.data[1].username);
+      setRole(response.data[10].role);
     } catch (error) {
       console.log(error);
       // Alert.alert("Error", "Unable to get group details");
@@ -142,149 +143,99 @@ export default function Login({ navigation }) {
       console.log("username is ", userName);
 
       AsyncStorage.setItem("userName", userName);
-      navigation.navigate("FoodBottomTabs");
+      AsyncStorage.setItem("role", role);
+
+      if (role === "user") {
+        navigation.navigate("UserPage");
+      } else if (role === "owner") {
+        navigation.navigate("OwnerPage");
+      }
     }
   }, [groupID]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <UserContext.Provider value={{ email }}>
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <View style={{ width: 120, height: 220 }}>
-            <Image
-              source={require("../../../assets/icon.png")}
-              style={{ width: "100%", height: "100%" }}
-              resizeMode={"cover"}
-            />
-          </View>
-        </View>
-        {errorMessage ? (
-          <Text style={styles.errorMessage}>{errorMessage}</Text>
-        ) : null}
-        <View>
-          {/* Your email field Component below */}
-          <InputFieldComponent
-            placeholder={"Enter your email"}
-            icon="email"
-            label="Email"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-          />
-          {checkValidEmail ? (
-            <Text style={styles.textFailed}>Wrong format email</Text>
-          ) : (
-            <Text style={styles.textFailed}> </Text>
-          )}
-          {/* Your Password field Component below */}
-          <PasswordComponent
-            placeholder={"Enter your password"}
-            icon="key"
-            label="Password"
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-          />
-        </View>
-        {/* Forgot password button  */}
-        <View style={{ marginHorizontal: 20 }}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("ForgetPassword")}
-            style={{ alignSelf: "flex-end" }}
-          >
-            <Text style={styles.forgetPassword}>Forget Password?</Text>
-          </TouchableOpacity>
-
-          {/* Login Button which navigate to next Home screen who have footer too*/}
-
-          <ButtonComponent
-            label="Sign In"
-            onPress={() => handleLogin()}
-            backgroundColor={Theme.green}
-            marginLeft={20}
-            marginRight={20}
-            marginTop={10}
-            marginButton={10}
-            labelColor={Theme.white}
-          />
-
-          {/* Create an account Button which navigate to next Signup screen */}
-          <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-            <Text
-              style={{
-                marginLeft: 5,
-                color: Theme.primary,
-                fontWeight: "bold",
-                fontSize: 16,
-                textDecorationLine: "underline",
-              }}
-            >
-              Create an account
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </UserContext.Provider>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require("../../../assets/icon.png")}
+          style={styles.logo}
+          resizeMode="cover"
+        />
+      </View>
+      {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
+      <View>
+        <CustomTextInput
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+          label="Email"
+          icon="email"
+          keyboardType="email-address"
+        />
+        {checkValidEmail && (
+          <Text style={styles.errorText}>Wrong format email</Text>
+        )}
+        <PasswordComponent
+          placeholder="Enter your password"
+          icon="key"
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+        />
+      </View>
+      <View style={styles.actionContainer}>
+        <Button
+          title="Sign In"
+          onPress={handleLogin}
+          color={COLORS.PRIMARY_GREEN}
+        />
+        <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+          <Text style={styles.createAccountText}>Create an account</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: COLORS.WHITE,
     justifyContent: "center",
   },
-  sginInDesign: {
-    color: "#7B7BC4",
-    fontSize: 20,
-    fontWeight: "bold",
+  logoContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  logo: {
+    width: 120,
+    height: 220,
+  },
+  errorMessage: {
+    color: COLORS.ERROR_RED,
+    textAlign: "center",
     marginBottom: 15,
   },
-  forgetPassword: {
-    color: "#7B7BC4",
-    marginVertical: 5,
-    fontSize: 14,
-  },
-  wrapperInput: {
-    borderWidth: 0.5,
-    borderRadius: 5,
-    borderColor: "grey",
-    marginTop: 10,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  input: {
-    padding: 10,
-    width: "100%",
-  },
-  wrapperIcon: {
-    position: "absolute",
-    right: 0,
-    padding: 10,
-  },
-  icon: {
-    width: 30,
-    height: 24,
-  },
-  button: {
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "orange",
-    borderRadius: 5,
-    marginTop: 25,
-  },
-  buttonDisable: {
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "grey",
-    borderRadius: 5,
-    marginTop: 25,
-  },
-  text: {
-    color: "white",
-    fontWeight: "700",
-  },
-  textFailed: {
+  errorText: {
+    color: COLORS.ERROR_RED,
     alignSelf: "flex-end",
-    color: "red",
+  },
+  inputField: {
+    height: 40,
+    borderColor: COLORS.GRAY,
+    borderWidth: 1,
+    paddingLeft: 10,
+    marginVertical: 5,
+    borderRadius: 5,
+  },
+  actionContainer: {
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+  createAccountText: {
+    marginLeft: 5,
+    color: COLORS.PRIMARY_GREEN,
+    fontWeight: "bold",
+    fontSize: 16,
+    textDecorationLine: "underline",
   },
 });

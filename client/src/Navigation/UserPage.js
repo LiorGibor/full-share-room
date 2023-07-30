@@ -1,28 +1,25 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import HomeScreen from "../../src/Screen/Home/HomeScreen";
+import HomeScreen from "../Screen/Appartements/Appartements";
 import ChatList from "../Screen/Chat/ChatList";
-import StepIndicatorScreen from "../Screen/Checkout/NotificationScreen";
-import ProfileScreen from "../../src/Screen/Profile/ProfileScreen";
-import Theme from "../../src/Constants/Theme";
+import StepIndicatorScreen from "../Screen/Notification/NotificationScreen";
+import ProfileScreen from "../Screen/Profile/UserScreen";
 
 const Tab = createBottomTabNavigator();
 // Below are the screens whcih use in bottom tab those are import in this screen
-function FoodBottomTabs({ route }) {
+function UserPage({ route }) {
   return (
     <Tab.Navigator
       //First screen will be home all the time
       initialRouteName="Home"
       screenOptions={{
-        tabBarActiveTintColor: Theme.primary,
+        tabBarActiveTintColor: "#7B7BC4",
         headerShown: false,
-        tabBarInactiveTintColor: Theme.grey,
+        tabBarInactiveTintColor: "#7B7BC4",
       }}
     >
       <Tab.Screen
@@ -72,4 +69,4 @@ function FoodBottomTabs({ route }) {
     </Tab.Navigator>
   );
 }
-export default FoodBottomTabs;
+export default UserPage;

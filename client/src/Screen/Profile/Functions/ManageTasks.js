@@ -6,7 +6,6 @@ import {
   Button,
   FlatList,
   CheckBox,
-  TouchableOpacity,
   StyleSheet,
   Platform,
   Animated,
@@ -19,7 +18,6 @@ const ManageTasks = () => {
   const [groupID, setGroupID] = useState("");
   const [userID, setUserID] = useState("");
   const [userName, setUserName] = useState("");
-  const [notificationText, setNotificationText] = useState("");
   const [taskName, setTaskName] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [tasks, setTasks] = useState([]);
@@ -163,10 +161,7 @@ const ManageTasks = () => {
         renderItem={({ item }) => <TaskItem item={item} />}
       />
 
-      <Button
-        title="Home"
-        onPress={() => navigation.navigate("FoodBottomTabs")}
-      />
+      <Button title="Home" onPress={() => navigation.navigate("UserPage")} />
     </View>
   );
 };
